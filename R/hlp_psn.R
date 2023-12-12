@@ -47,7 +47,7 @@ CalCO2effectPsn <- function(Ca, vegpar) {
 
 # Calculate CO2 effect on conductance and set slope and intercept for A-gs
 # relationship
-CalCO2effectConductance <- function(Ca, DelAmax, CiElev, Ci350) {
+CalCO2effectConductance <- function(Ca, DelAmax, CiElev, Ci350, sitepar) {
     if (sitepar$CO2gsEffect == 1) {
         Delgs <- DelAmax / ((Ca - CiElev) / (350 - Ci350))
         DWUE <- 1 + (1 - Delgs)
@@ -118,7 +118,6 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         currow$GDDTot, vegpar$GDDFolEnd, currow$Dayspan
     )
     
-    
 
     if (model == "pnet-cn") {
         CO2Psn <- CalCO2effectPsn(climate_dt$CO2[rstep], vegpar)
@@ -129,7 +128,8 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         share$BaseFolResp <- share$Amax * vegpar$BaseFolRespFrac
 
         CO2Cond <- CalCO2effectConductance(climate_dt$CO2[rstep], 
-            CO2Psn$DelAmax, CO2Psn$CiElev, CO2Psn$Ci350
+            CO2Psn$DelAmax, CO2Psn$CiElev, CO2Psn$Ci350,
+            sitepar
         )
 
         currow$DelAmax <- CO2Psn$DelAmax

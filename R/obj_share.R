@@ -277,7 +277,7 @@ ShareVars <- R6::R6Class("ShareVars",
                 Year, 
                 # Photosynthesis
                 NPPFolYr, NPPWoodYr, NPPRootYr, NEP, TotGrossPsn,
-                DWater, TotTrans, TotPsn, TotDrain, TotEvap, ET,
+                TotPrec, DWater, TotTrans, TotPsn, TotDrain, TotEvap, ET, 
                 # Carbon cycle
                 PlantC, BudC, WoodC, RootC, 
                 FolMass, DeadWoodM, WoodMass, RootMass, 

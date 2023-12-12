@@ -125,8 +125,8 @@ AtmEnviron <- function(climate_dt, lat, share_dt) {
     share_dt[, Month := lubridate::month(Date)]
     #HACK: There are three calculations of Dayspan
     # share_dt[, Dayspan := lubridate::days_in_month(Month)]
-    # share_dt[, Dayspan := 30]
-    share_dt[, Dayspan := DOY - shift(DOY, 1, 0), by = "Year"]
+    share_dt[, Dayspan := 30]
+    # share_dt[, Dayspan := DOY - shift(DOY, 1, 0), by = "Year"]
     
     share_dt[, Daylenhr := CalDaylengthHr(lat, DOY)]
     share_dt[, Daylen := CalDaylengthSec(Daylenhr)]
