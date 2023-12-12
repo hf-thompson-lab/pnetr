@@ -1,0 +1,96 @@
+PnET runs at 11:11, 03/06/2013
+==============================================================================
+Model options:
+1					-Mode type
+2					-Model type
+==============================================================================
+Site settings:
+  44.05            -Latitude
+0            -Ozone effect
+1            -CO2 effect
+0            -Absolute N content
+1563           -Simulated years from
+2012            -Simulated years to
+C:\pnet\PNET\Case\HB\HB_Climate.txt            -Climate file name
+  12.000             -Water hold capacity,cm
+  13.000            -Snow pack,cm
+  12.000            -Soil water, cm
+   0.000            -Soil moisture factor
+   0.100            -Fast flow fraction
+   0.040            -Water realease factor
+   1.000            -Water stress
+  13500.00            -Humus mass, g/m2
+ 390.000            -Humus N mass, g/m2
+   0.010            -Soil NH4 content, g/m2
+   0.075            -Humus decomposition constant 
+  27.460            -Soil respiration factor A 
+   0.068            -Soil respiration factor B 
+ 151.000            -N immobolization factor A 
+ -35.000            -N immobolization factor B 
+==============================================================================
+Tree settings:
+       2	          -ForestCode  // not use currently
+      40           	-Forest age		// not use currently
+     0.0            -Leaf mass
+ 20000.0            -Wood mass
+ 11300.0            -Dead wood mass
+     6.0            -Root mass
+   135.0            -BudC
+   300.0            -WoodC
+   900.0            -PlantC
+     1.0            -PlantN
+     1.4            -N Ratio
+ -46.000           	-AmaxA
+  71.900           	-AmaxB
+ 200.000           	-HalfSat
+   0.100				-BaseFolRespFrac
+   2.000           	-RespQ10
+   4.000           	-PsnTMin
+  24.000           	-PsnTOpt
+   0.750				-AmaxFrac
+   1.000           	-FolReten
+ 100.000           	-SLWmax, 'g dry matter/m2 leaf
+   0.200				-SLWdel, 'g dry matter/(m2 leaf * g leaf mass)
+ 100.000           	-GDDFolStart
+ 900.000           	-GDDFolEnd
+ 100.000				-m_GDDWoodStart
+1600.000				-m_GDDWoodEnd 
+ 270.000           	-SenescStart
+   340.0            -Max leaf mass
+     0.0            -Min leaf mass
+   0.580           	-k
+   1.800           	-FolNCon, by weight
+   0.950				-m_FolRelGrowMax, '/yr
+   0.450				-m_CFracBiomass 
+   0.000				-RootAllocA     
+   2.000				-RootAllocB
+   0.250           	-GRespFrac
+   0.07          	-WoodMRFrc
+   1.000           	-RootMRespFrc
+   0.750				-m_PlantCReserveFrac
+   0.800				-m_MinWoodFolRatio 
+   0.050           	-DVPD1
+   2.000           	-DVPD2
+  10.900				-m_WUEConst
+   0.110				-m_PrecIntFrac
+   0.0065				-m_FLPctN 
+   0.012				-m_RLPctN 
+   0.002				-m_WLPctN 
+   0.600				-FolNConRange 
+   0.500           	-FolNRetrans
+  20.000				-m_MaxNStore
+   0.025				-WoodTurnover 
+   0.789				-RootTurnoverA 
+   0.191				-RootTurnoverB  
+   0.021				-RootTurnoverC 
+   0.100				-m_WoodLitLossRate  
+   0.800				-m_WoodLitCLoss 
+==============================================================================
+Management settings:
+       0				-Total number of disturbance  
+       0				-Agriculture from year  
+       0				-Agriculture to year  
+   0.000				-Agriculture removal fraction 
+       0         0				-Fertilization from year and DOY
+       0         0				-Fertilization to year and DOY  
+   0.000	   0.000    0.000 			-Fertilization rate for NH4 | NO3 | Urea
