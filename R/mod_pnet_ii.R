@@ -38,6 +38,14 @@ PnET_II <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
         share$BaseFolResp, vegpar$RespQ10, share$dt$Tnight,
         vegpar$PsnTOpt, share$dt$Nightlen
     )]
+
+    # Calculate temperature effect
+    share$dt[, DTemp := CalDTemp(
+        Tday, Tmin, vegpar$PsnTOpt, vegpar$PsnTMin,
+        GDDTot, vegpar$GDDFolEnd, Dayspan
+    )]
+
+    # Calculate DVPD effect
     share$dt[, DVPD := 1 - vegpar$DVPD1 * share$dt$VPD^vegpar$DVPD2]
 
     # Create a progress bar

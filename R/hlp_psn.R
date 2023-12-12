@@ -10,10 +10,18 @@ CalDTemp <- function(Tday, Tmin, PsnTOpt, PsnTMin, GDDTot, GDDFolEnd, Dayspan) {
     PsnTMax <- PsnTOpt + (PsnTOpt - PsnTMin)
     DTemp <- ((PsnTMax - Tday) * (Tday - PsnTMin)) / 
         (((PsnTMax - PsnTMin) / 2.0)^2)
-    if ((Tmin < 6) && (DTemp > 0) && (GDDTot >= GDDFolEnd)) {
-        DTemp <- DTemp * (1.0 - ((6.0 - Tmin) / 6.0) * (Dayspan / 30.0))
-    }
-    DTemp <- max(DTemp, 0)
+    
+    DTemp <- sapply(1:length(DTemp), function(i) {
+        if ((Tmin[i] < 6) & (DTemp[i] > 0) & (GDDTot[i] >= GDDFolEnd)) {
+            DTemp_new <- max(
+                0, 
+                DTemp[i] * (1.0 - ((6.0 - Tmin[i]) / 6.0) * (Dayspan[i] / 30.0))
+            )
+            return(DTemp_new)
+        } else {
+            return(DTemp[i])
+        }
+    })
     
     return(DTemp)
 }
@@ -85,13 +93,32 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
     # Previous time step
     prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
 
+    # No leaves, no photosynthesis
+    if (currow$FolMass <= 0) {
+        currow$PosCBalMassTot <- ifelse(currow$Year == prerow$Year,
+            prerow$PosCBalMassTot,
+            currow$PosCBalMassTot
+        )
+        currow$PosCBalMassIx <- ifelse(currow$Year == prerow$Year,
+            prerow$PosCBalMassIx,
+            currow$PosCBalMassIx
+        )
+        currow$CanopyNetPsn <- 0
+        currow$CanopyGrossPsn <- 0
+        currow$LAI <- 0
+        currow$DayResp <- 0
+        currow$NightResp <- 0
+
+        return(currow)
+    }
+
     # Calculate temperature effect
     currow$DTemp <- CalDTemp(
         currow$Tday, currow$Tmin, vegpar$PsnTOpt, vegpar$PsnTMin, 
         currow$GDDTot, vegpar$GDDFolEnd, currow$Dayspan
     )
     
-    # DVPD was calculated
+    
 
     if (model == "pnet-cn") {
         CO2Psn <- CalCO2effectPsn(climate_dt$CO2[rstep], vegpar)
@@ -107,6 +134,10 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
 
         currow$DelAmax <- CO2Psn$DelAmax
         currow$DWUE <- CO2Cond$DWUE
+
+        # Calculate canopy ozone extinction based on folmass
+        O3Prof <- 0.6163 + (0.00105 * currow$FolMass)
+        CanopyNetPsnO3 <- 0
     }
 
     GrossAmax <- share$Amax_d + share$BaseFolResp
@@ -127,111 +158,92 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         vegpar$PsnTOpt, currow$Nightlen
     )
 
-    # Calculate canopy ozone extinction based on folmass
-    O3Prof <- 0.6163 + (0.00105 * currow$FolMass)
-    CanopyNetPsnO3 <- 0
+    # Calculate photosynthsis by simulating canopy layers
+    currow$PosCBalMass <- currow$FolMass
+    # Number of layers to simulate
+    Layer <- 0
+    nlayers <- vegpar$IMAX
+    # Average leaf mass per layer
+    avgMass <- currow$FolMass / nlayers
+    for (ix in 1:nlayers) {
+        # Leaf mass at this layer
+        i <- ix * avgMass
+        # Convert leaf mass to leaf area
+        SLWLayer <- vegpar$SLWmax - (vegpar$SLWdel * i)
+        currow$LAI <- currow$LAI + avgMass / SLWLayer
 
-    if (currow$FolMass > 0) {
-        currow$PosCBalMass <- currow$FolMass
+        # Calculate light attenuation
+        Il <- climate_dt[rstep, Par] * exp(-vegpar$k * currow$LAI)
+        # Light effect on photosynthesis
+        LightEff <- (1.0 - exp(-Il * log(2.0) / vegpar$HalfSat))
 
-        # Number of layers to simulate
-        Layer <- 0
-        nlayers <- vegpar$IMAX
-        # Average leaf mass per layer
-        avgMass <- currow$FolMass / nlayers
-        for (ix in 1:nlayers) {
-            # Leaf mass at this layer
-            i <- ix * avgMass
-            # Convert leaf mass to leaf area
-            SLWLayer <- vegpar$SLWmax - (vegpar$SLWdel * i)
-            currow$LAI <- currow$LAI + avgMass / SLWLayer
-            
-            # Calculate light attenuation
-            Il <- climate_dt[rstep, Par] * exp(-vegpar$k * currow$LAI)
-            # Light effect on photosynthesis
-            LightEff <- (1.0 - exp(-Il * log(2.0) / vegpar$HalfSat))
-            
-            # Gross layer psn w/o water stress
-            LayerGrossPsnRate <- currow$GrossAmax * LightEff
-            LayerGrossPsn <- LayerGrossPsnRate * (avgMass)
-            
-            # Net layer psn w/o water stress
-            LayerResp <- (currow$DayResp + currow$NightResp) * avgMass
-            LayerNetPsn <- LayerGrossPsn - LayerResp
-            if (LayerNetPsn < 0 && currow$PosCBalMass == currow$FolMass) {
-                currow$PosCBalMass <- (ix - 1.0) * avgMass
-            }
-            currow$CanopyNetPsn <- currow$CanopyNetPsn + LayerNetPsn
-            currow$CanopyGrossPsn <- currow$CanopyGrossPsn + LayerGrossPsn
+        # Gross layer psn w/o water stress
+        LayerGrossPsnRate <- currow$GrossAmax * LightEff
+        LayerGrossPsn <- LayerGrossPsnRate * (avgMass)
 
-            if (model == "pnet-cn") {
-                # Ozone effect on Net Psn
-                if (climate_dt$O3[rstep] > 0) {
-                    # Convert netpsn to micromoles for calculating conductance
-                    netPsnumol <- ((LayerNetPsn * 10 ^ 6) / 
-                        (currow$Daylen * 12)) / 
-                        ((currow$FolMass / 50) / SLWLayer)
-                    # Calculate ozone extinction throughout the canopy
-                    Layer <- Layer + 1
-                    RelLayer <- Layer / 50
-                    RelO3 <- 1 - (RelLayer * O3Prof)^3
-                    # % Calculate Conductance (mm/s): Conductance down-regulates
-                    # with prior O3 effects on Psn
-                    LayerG <- (CO2Cond$gsInt + (CO2Cond$gsSlope * netPsnumol)) *
-                        (1 - share$O3Effect[Layer])
-                    # For no downregulation use: 
-                    # LayerG = gsInt + (gsSlope * netPsnumol);
-                    if (LayerG < 0) {
-                        LayerG <- 0
-                    }
+        # Net layer psn w/o water stress
+        LayerResp <- (currow$DayResp + currow$NightResp) * avgMass
+        LayerNetPsn <- LayerGrossPsn - LayerResp
+        if (LayerNetPsn < 0 && currow$PosCBalMass == currow$FolMass) {
+            currow$PosCBalMass <- (ix - 1.0) * avgMass
+        }
+        currow$CanopyNetPsn <- currow$CanopyNetPsn + LayerNetPsn
+        currow$CanopyGrossPsn <- currow$CanopyGrossPsn + LayerGrossPsn
 
-                    # Calculate cumulative ozone effect for each canopy layer
-                    # with consideration that previous O3 effects were modified
-                    # by drought
-                    share$O3Effect[Layer] <- min(
-                        1, 
-                        (share$O3Effect[Layer] * currow$DroughtO3Frac) + 
-                        (0.0026 * LayerG * climate_dt$O3[rstep] * RelO3)
-                    )
-                    LayerDO3 = 1 - share$O3Effect[Layer]
-                } else {
-                    LayerDO3 = 1
+        if (model == "pnet-cn") {
+            # Ozone effect on Net Psn
+            if (climate_dt$O3[rstep] > 0) {
+                # Convert netpsn to micromoles for calculating conductance
+                netPsnumol <- ((LayerNetPsn * 10^6) /
+                    (currow$Daylen * 12)) /
+                    ((currow$FolMass / 50) / SLWLayer)
+                # Calculate ozone extinction throughout the canopy
+                Layer <- Layer + 1
+                RelLayer <- Layer / 50
+                RelO3 <- 1 - (RelLayer * O3Prof)^3
+                # % Calculate Conductance (mm/s): Conductance down-regulates
+                # with prior O3 effects on Psn
+                LayerG <- (CO2Cond$gsInt + (CO2Cond$gsSlope * netPsnumol)) *
+                    (1 - share$O3Effect[Layer])
+                # For no downregulation use:
+                # LayerG = gsInt + (gsSlope * netPsnumol);
+                if (LayerG < 0) {
+                    LayerG <- 0
                 }
 
-                LayerNetPsnO3 <- LayerNetPsn * LayerDO3
-                CanopyNetPsnO3 <- CanopyNetPsnO3 + LayerNetPsnO3
-            }
-        }
-
-        if (currow$DTemp > 0 && currow$GDDTot > vegpar$GDDFolEnd && 
-            climate_dt[rstep, DOY] < vegpar$SenescStart
-        ) {
-            currow$PosCBalMassTot <- ifelse(currow$Year == prerow$Year, 
-                prerow$PosCBalMassTot + (
-                    currow$PosCBalMass * currow$Dayspan
-                ),
-                currow$PosCBalMassTot + (
-                    currow$PosCBalMass * currow$Dayspan
+                # Calculate cumulative ozone effect for each canopy layer
+                # with consideration that previous O3 effects were modified
+                # by drought
+                share$O3Effect[Layer] <- min(
+                    1,
+                    (share$O3Effect[Layer] * currow$DroughtO3Frac) +
+                        (0.0026 * LayerG * climate_dt$O3[rstep] * RelO3)
                 )
-            )
-            currow$PosCBalMassIx <- ifelse(currow$Year == prerow$Year,
-                prerow$PosCBalMassIx + currow$Dayspan,
-                currow$PosCBalMassIx + currow$Dayspan
-            )
-        } else {
-            currow$PosCBalMassTot <- ifelse(currow$Year == prerow$Year,
-                prerow$PosCBalMassTot,
-                currow$PosCBalMassTot
-            )
-            currow$PosCBalMassIx <- ifelse(currow$Year == prerow$Year,
-                prerow$PosCBalMassIx,
-                currow$PosCBalMassIx
-            )
-        }
+                LayerDO3 = 1 - share$O3Effect[Layer]
+            } else {
+                LayerDO3 = 1
+            }
 
-        if (share$LightEffMin > LightEff) {
-            share$LightEffMin <- LightEff
+            LayerNetPsnO3 <- LayerNetPsn * LayerDO3
+            CanopyNetPsnO3 <- CanopyNetPsnO3 + LayerNetPsnO3
         }
+    }
+
+    if (currow$DTemp > 0 && currow$GDDTot > vegpar$GDDFolEnd &&
+        climate_dt[rstep, DOY] < vegpar$SenescStart
+    ) {
+        currow$PosCBalMassTot <- ifelse(currow$Year == prerow$Year,
+            prerow$PosCBalMassTot + (
+                currow$PosCBalMass * currow$Dayspan
+            ),
+            currow$PosCBalMassTot + (
+                currow$PosCBalMass * currow$Dayspan
+            )
+        )
+        currow$PosCBalMassIx <- ifelse(currow$Year == prerow$Year,
+            prerow$PosCBalMassIx + currow$Dayspan,
+            currow$PosCBalMassIx + currow$Dayspan
+        )
     } else {
         currow$PosCBalMassTot <- ifelse(currow$Year == prerow$Year,
             prerow$PosCBalMassTot,
@@ -241,13 +253,12 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             prerow$PosCBalMassIx,
             currow$PosCBalMassIx
         )
-        currow$CanopyNetPsn <- 0
-        currow$CanopyGrossPsn <- 0
-        currow$LAI <- 0
-        currow$DayResp <- 0
-        currow$NightResp <- 0
     }
 
+    if (share$LightEffMin > LightEff) {
+        share$LightEffMin <- LightEff
+    }
+    
     if (model == "pnet-cn") {
         # Calculate whole-canopy ozone effects before drought
         if (climate_dt$O3[rstep] > 0 && currow$CanopyGrossPsn > 0) {
