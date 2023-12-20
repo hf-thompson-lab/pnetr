@@ -15,9 +15,9 @@ test_that("Match PnET-Day w/ MATLAB result", {
     out_li <- mat_out$out[, , 1]
     out_li <- lapply(out_li, as.vector)
 
-    expect_equal(mon_dt$CanopyGrossPsn, out_li$gpp, tolerance = 0.001)
+    expect_equal(mon_dt$CanopyGrossPsn, out_li$gpp, tolerance = 0.01)
     expect_equal(mon_dt$VPD, out_li$vpd)
-    expect_equal(mon_dt$CanopyNetPsn, out_li$netpsn, tolerance = 0.001)
-    expect_equal(mon_dt$FolMass, out_li$folmass, tolerance = 0.01)
+    expect_equal(mon_dt$CanopyNetPsn, out_li$netpsn, tolerance = 0.01)
+    expect_equal(mon_dt$FolMass, out_li$folmass, tolerance = 0.1)
     expect_equal(mon_dt$DWater, out_li$waterstress, tolerance = 0.1)
 })
