@@ -41,11 +41,13 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     # Previous time step
     prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
 
-    # Since C allocation to bud, wood, and root happens annually, here for the
-    # monthly scale, their previous values should be propogated.
-    currow$BudC <- prerow$BudC
-    currow$WoodC <- prerow$WoodC
-    currow$RootC <- prerow$RootC
+    if (model == "pnet-ii") {
+        # Since C allocation to bud, wood, and root happens annually, here for
+        # the monthly scale, their previous values should be propogated.
+        currow$BudC <- prerow$BudC
+        currow$WoodC <- prerow$WoodC
+        currow$RootC <- prerow$RootC
+    }
 
     # Update plant C pool
     currow$PlantC <- prerow$PlantC + currow$NetPsnMo - currow$FolGRespMo
@@ -135,28 +137,47 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         WoodMRespMo - WoodGRespMo - currow$FolGRespMo
 
     if (model == "pnet-cn") {
-        
         # These values only change once a year, should be passed along steps
-        currow$NRatio <- prerow$NRatio
-        currow$NRatioNit <- prerow$NRatioNit
-        currow$RootNSinkEff <- prerow$RootNSinkEff
-
-        currow$WoodMass <- prerow$WoodMass + (WoodProdCMo / vegpar$CFracBiomass)
-        currow$WoodMassN <- prerow$WoodMassN + 
-            ((WoodProdCMo / vegpar$CFracBiomass) * vegpar$WLPctN * currow$NRatio)
         
+        if (currow$DOY >= prerow$DOY) {
+            currow$NRatio <- prerow$NRatio
+            currow$RootNSinkEff <- prerow$RootNSinkEff
+            currow$NRatioNit <- prerow$NRatioNit
 
-        currow$RootMass <- prerow$RootMass + (RootProdCMo / vegpar$CFracBiomass)
-        currow$RootMassN <- prerow$RootMassN + 
-            ((RootProdCMo / vegpar$CFracBiomass) * vegpar$RLPctN * currow$NRatio)
+            currow$WoodMass <- prerow$WoodMass + (WoodProdCMo / vegpar$CFracBiomass)
+            currow$WoodMassN <- prerow$WoodMassN +
+                ((WoodProdCMo / vegpar$CFracBiomass) * vegpar$WLPctN * currow$NRatio)
+
+            currow$RootMass <- prerow$RootMass + (RootProdCMo / vegpar$CFracBiomass)
+            currow$RootMassN <- prerow$RootMassN +
+                ((RootProdCMo / vegpar$CFracBiomass) * vegpar$RLPctN * currow$NRatio)
+
+            PlantN <- prerow$PlantN -
+                ((WoodProdCMo / vegpar$CFracBiomass) * vegpar$WLPctN * currow$NRatio)
+            currow$PlantN <- PlantN -
+                ((RootProdCMo / vegpar$CFracBiomass) * vegpar$RLPctN * currow$NRatio)
+
+            currow$NetCBal <- currow$NetPsnMo - WoodMRespMo - WoodGRespMo -
+                currow$FolGRespMo - RootMRespMo - RootGRespMo
+        } else {
+            currow$WoodMass <- prerow$WoodMass + (WoodProdCMo / vegpar$CFracBiomass)
+            currow$WoodMassN <- prerow$WoodMassN +
+                ((WoodProdCMo / vegpar$CFracBiomass) * vegpar$WLPctN * currow$NRatio)
+
+            currow$RootMass <- prerow$RootMass + (RootProdCMo / vegpar$CFracBiomass)
+            currow$RootMassN <- prerow$RootMassN +
+                ((RootProdCMo / vegpar$CFracBiomass) * vegpar$RLPctN * currow$NRatio)
+
+            PlantN <- currow$PlantN -
+                ((WoodProdCMo / vegpar$CFracBiomass) * vegpar$WLPctN * currow$NRatio)
+            currow$PlantN <- PlantN -
+                ((RootProdCMo / vegpar$CFracBiomass) * vegpar$RLPctN * currow$NRatio)
+
+            currow$NetCBal <- currow$NetPsnMo - WoodMRespMo - WoodGRespMo -
+                currow$FolGRespMo - RootMRespMo - RootGRespMo
+        }
+
         
-        PlantN <- prerow$PlantN - 
-            ((WoodProdCMo / vegpar$CFracBiomass) * vegpar$WLPctN * currow$NRatio)
-        currow$PlantN <- PlantN - 
-            ((RootProdCMo / vegpar$CFracBiomass) * vegpar$RLPctN * currow$NRatio)
-
-        currow$NetCBal <- currow$NetPsnMo - WoodMRespMo - WoodGRespMo - 
-            currow$FolGRespMo - RootMRespMo - RootGRespMo
     }
 
     return(currow)
@@ -293,9 +314,9 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         }
 
         # Update variables
-        # currow$NRatio <- NRatio
-        # currow$PlantN <- PlantN
-        # currow$RootNSinkEff <- sqrt(1 - (PlantN / vegpar$MaxNStore))
+        currow$NRatio <- NRatio
+        currow$PlantN <- PlantN
+        currow$RootNSinkEff <- sqrt(1 - (PlantN / vegpar$MaxNStore))
         
         # Annual total variable for PnET-CN
         currow$NEP <- currow$TotPsn - currow$SoilDecRespYr - 
@@ -334,6 +355,19 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     currow <- share$dt[rstep, ]
     # Previous time step
     prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+
+    # Inherit some variables
+    currow$BudC <- prerow$BudC
+    currow$WoodC <- prerow$WoodC
+    currow$RootC <- prerow$RootC
+    currow$PlantC <- prerow$PlantC
+
+    if (model == "pnet-cn") {
+        currow$PlantN <- prerow$PlantN
+        currow$BudN <- prerow$BudN
+        # currow$NH4 <- prerow$NH4
+        # currow$NRatioNit <- prerow$NRatioNit
+    }
 
     currow$NPPFolYr <- prerow$FolProdCYr / vegpar$CFracBiomass
     currow$NPPWoodYr <- prerow$WoodProdCYr / vegpar$CFracBiomass
@@ -380,12 +414,11 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
 
 
     if (model == "pnet-cn") {
-        if (prerow$PlantN > vegpar$MaxNStore) {
+        if (currow$PlantN > vegpar$MaxNStore) {
             currow$PlantN <- vegpar$MaxNStore
             currow$NH4 <- prerow$NH4 + (prerow$PlantN - vegpar$MaxNStore)
-        } else {
-            currow$PlantN <- prerow$PlantN
         }
+
         # Calculate NRatio
         NRatio <- 1 + (currow$PlantN / vegpar$MaxNStore) * vegpar$FolNConRange
         if (NRatio < 1) {

@@ -45,7 +45,7 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     for (rstep in 1L:length(share$dt$DOY)) {
         
         # End of year activity
-        if (rstep != 1 && share$dt$DOY[rstep] < share$dt$DOY[rstep]) {
+        if (rstep != 1 && share$dt$DOY[rstep] < share$dt$DOY[rstep - 1]) {
             set(share$dt, rstep, names(share$dt), AllocateYrPre(
                 sitepar, vegpar, share, rstep, model = "pnet-cn"
             ))

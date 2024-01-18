@@ -94,7 +94,7 @@ Decomp <- function(climate_dt, sitepar, vegpar, share, rstep) {
     NH4 <- NH4 - NetNitr
 
     # Plant uptake
-    RootNSinkStr <- min(prerow$RootNSinkEff * TMult, 0.98)
+    RootNSinkStr <- min(currow$RootNSinkEff * TMult, 0.98)
     PlantNUptake <- (NH4 + NO3) * RootNSinkStr
     if ((PlantNUptake + currow$PlantN) > vegpar$MaxNStore) {
         PlantNUptake <- vegpar$MaxNStore - currow$PlantN
