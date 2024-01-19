@@ -42,7 +42,7 @@ $$\text{DayResp}^m = (\text{BaseFolResp} \cdot \textcolor{cyan}{\text{RespQ10}}^
 
 $$\text{NightResp}^m = (\text{BaseFolResp} \cdot \textcolor{cyan}{\text{RespQ10}}^{(\text{T}_{night}^m - \textcolor{cyan}{\text{PsnTopt}}) / 10} \cdot \text{Nightlength}^m \cdot 12) / 10^9$$
 
-*Note that the above variables ($\text{Amax}$, $\text{Amax}^d$, $\text{BaseFolResp}$, $\text{DayResp}^m$, $\text{NightResp}^m$) can be calculated once and they don't change throughout the entire simulation.*
+Note that the above variables ($\text{Amax}$, $\text{Amax}^d$, $\text{BaseFolResp}$, $\text{DayResp}^m$, $\text{NightResp}^m$) can be calculated once and they don't change throughout the entire simulation.
 
 Then, $\text{PotGrossAmax}$ can be calculated by adding $\text{Amax}^{d}$ and $\text{BaseFolResp}$:
 
