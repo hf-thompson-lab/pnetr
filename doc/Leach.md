@@ -8,10 +8,7 @@ Here are the variables involved (See [variables_table](/doc/paramters_table.md) 
 
 All available nitrate is assumed to be in the soil solution. The fraction of soil water drains in any month is multiplied by the total NO3 pool to determine the total nitrate leaching in that month.
 
-$$
-\text{NDrain} = \textcolor{cyan}{\text{FracDrain}} \cdot NO3
-$$
-$$
-\text{NDrainYr}^m = \Sigma_{i=1}^m \text{NDrain}^i
-$$
+$$\text{NDrain} = \textcolor{cyan}{\text{FracDrain}} \cdot NO3$$
+
+$$\text{NDrainYr}^m = \Sigma_{i=1}^m \text{NDrain}^i$$
 

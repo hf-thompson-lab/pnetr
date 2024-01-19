@@ -205,18 +205,17 @@ $$\text{NEP} = \text{TotPsn} - \text{WoodMRespYr} - \text{WoodGRespYr} - \text{F
 For PnET-CN, there is also an annual allocation routine for N that determines the relative degree of N limitation on plants and the effect of this limitation on N content of foliage and other tissues. Carbon and nitrogen for next year's foliar and wood production are also transferred to bud and wood compartments.
 
 $\text{NRatio}$ is central to the interactions between carbon and nitrogen cycles and expresses the degree of N limitation on plant function. This in turn affects both the nitrogen concentration in foliage, and so maximum rates of photosynthesis, and also the fraction of mineralized N which is nitrified. $\text{NRatio}$ is determined by the amount of mobile N in the plant ($\text{PlantN}$) relative to a specified maximum value ($\textcolor{cyan}{\text{MaxNStore}}$). An additional variable ($\text{FolNConRange}$) limits the range of $\text{NRatio}$, which is calculated as:
-$$
-\text{NRatio} = 1 + (\text{PlantN} / \textcolor{cyan}{\text{MaxNStore}}) \cdot \text{FolNConRange}
-$$
+
+$$\text{NRatio} = 1 + (\text{PlantN} / \textcolor{cyan}{\text{MaxNStore}}) \cdot \text{FolNConRange}$$
+
 where $\text{FolNConRange}$ establishes the maximum fractional increase in N concentration in foliage relative to the minimum or critical concentration. This in turn is determined by the re-translocation fraction from senescing foliage times the minimum concentration in litter. No re-translocation is assumed to occur from wood and fine roots.
 
 The amount of $\text{PlantN}$ transferred to $\text{BudN}$ for next year's foliar growth is:
-$$
-\text{BudN} = \text{BudC} / \textcolor{cyan}{\text{CFracFol}} \cdot \text{FLPctN} \cdot (\frac{1}{1 - \textcolor{cyan}{\text{FolNRetrans}}}) \cdot \text{NRatio}
-$$
+
+$$\text{BudN} = \text{BudC} / \textcolor{cyan}{\text{CFracFol}} \cdot \text{FLPctN} \cdot (\frac{1}{1 - \textcolor{cyan}{\text{FolNRetrans}}}) \cdot \text{NRatio}$$
+
 where $\text{BudC}$ is the amount of carbon allocated to next year's foliar production. $\textcolor{cyan}{\text{CFracFol}}$ is the fraction of carbon in foliar biomass. $\text{FLPctN}$ is the minimal percent N in foliar litter. 
 
 Then, the next year's foliar N concentration ($\text{FolNCon}$) is determined as:
-$$
-\text{FolNCon} = \frac{\text{FolMass} \cdot \text{FolNCon} / 100 + \text{BudN}}{\text{FolMass} + \text{BudC} / \textcolor{cyan}{\text{CFracBiomass}} \cdot 100}  
-$$
+
+$$\text{FolNCon} = \frac{\text{FolMass} \cdot \text{FolNCon} / 100 + \text{BudN}}{\text{FolMass} + \text{BudC} / \textcolor{cyan}{\text{CFracBiomass}} \cdot 100}$$
