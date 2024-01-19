@@ -35,13 +35,9 @@ The rest of the precipitation ($\text{PrepRemain}^m$) is dropped in the form of 
 $$\text{PrepRemain}^m = \textcolor{lime}{Prep^m} - \text{Evap}^m$$
 
 $$\text{SnowFrac}^m = \begin{cases}
-
-1 & T_{avg}^m \le -5 \\
-
-(T_{avg}^m - 2) / -7 & -5 < T_{avg}^m < 2 \\
-
-0 & T_{avg}^m \ge 2
-
+    1 & T_{avg}^m \le -5 \\
+    (T_{avg}^m - 2) / -7 & -5 < T_{avg}^m < 2 \\
+    0 & T_{avg}^m \ge 2
 \end{cases}$$
 
 where $\text{SnowFrac}^m$ is the fraction of precipitation falling as snow.
@@ -53,11 +49,8 @@ $$\text{PotSnowPack}^m = \text{SnowPack}^{m-1} + \textcolor{lime}{Prep^m} \cdot 
 But, depends on temperature, a portion of snow may be melted:
 
 $$\text{SnowMelt}^m = \begin{cases}
-
-\min(0.15 \cdot \min(1, T_{avg}^m) \cdot \text{Dayspan}^m, \text{PotSnowPack}^m) & \text{PotSnowPack}^m > 0 \\
-
-0 & \text{PotSnowPack}^m = 0
-
+    \min(0.15 \cdot \min(1, T_{avg}^m) \cdot \text{Dayspan}^m, \text{PotSnowPack}^m) & \text{PotSnowPack}^m > 0 \\
+    0 & \text{PotSnowPack}^m = 0
 \end{cases}$$
 
 So, the actual snow pack is:
@@ -79,6 +72,7 @@ $$\text{WaterIn}^m = \text{PotWaterIn}^m - \text{FastFlow}^m$$
 We can also calculate the average daily input water in this month:
 
 $$\text{WaterIn}^d = \text{WaterIn}^m / \text{Dayspan}^m$$
+
 
 ## Transpiration
 
@@ -108,11 +102,8 @@ $$\text{PotWater}^d = \text{Water}_{d-1} + \text{WaterIn}^d$$
 so the transpiration for the day is:
 
 $$\text{Trans}^d = \begin{cases}
-
-\text{PotTrans}^d & \text{PotWater}^d \geq \text{PotTrans}^d / \textcolor{cyan}{\text{f}} \\
-
-\text{PotWater}^d \cdot \textcolor{cyan}{\text{f}} & \text{PotWater}^d < \text{PotTrans}^d / \textcolor{cyan}{\text{f}}
-
+    \text{PotTrans}^d & \text{PotWater}^d \geq \text{PotTrans}^d / \textcolor{cyan}{\text{f}} \\
+    \text{PotWater}^d \cdot \textcolor{cyan}{\text{f}} & \text{PotWater}^d < \text{PotTrans}^d / \textcolor{cyan}{\text{f}}
 \end{cases}$$
 
 Then, the actual daily water after transpiration is:
@@ -141,6 +132,7 @@ $$\text{DWatertot}^{12} = \Sigma_{m=1}^{12} (\text{DWater}^m \cdot \text{Dayspan
 
 $$\text{DWaterIx}^{12} = \Sigma_{m=1}^{12} \text{Dayspan}^m$$
 
+
 ## Water stress on photosynthesis
 
 If $\textcolor{cyan}{\text{WaterStress}^m} = 0$, then $\text{DWater}^m = 1$
@@ -154,6 +146,7 @@ $$\text{CanopyGrossPsnAct}^m = \text{CanopyGrossPsnRate}^m \cdot \text{Dayspan}^
 $$\text{GrsPsn}^m = \text{CanopyGrossPsnAct}^m$$
 
 $$\text{NetPsn}^m = (\text{CanopyGrossPsnRate}^m - (\text{DayResp}^m + \text{NightResp}^m) \cdot \text{FolMass}^m) \cdot \text{Dayspan}^m$$
+
 
 ## Water storage 
 
