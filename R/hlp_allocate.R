@@ -307,7 +307,6 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         if (is.na(folnconnew)) {
             folnconnew <- 0
         }
-        # HACK: I don't quite like this b/c it changes the input value
         vegpar$FolNCon <- folnconnew
 
         PlantN <- PlantN - BudN
