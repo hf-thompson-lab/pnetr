@@ -130,6 +130,7 @@ And the net carbon balance is:
 
 $$\text{NetCBal} = \text{NetPsnMo} - \text{SoilRespMo} - \text{WoodMResp}^m - \text{WoodGResp}^m - \text{FolGRespMo}$$
 
+
 ## Annual carbon allocation
 
 In addition to monthly carbon allocation, there is also an annual carbon allocation.
@@ -145,21 +146,15 @@ $$\text{NPPRootYr} = \text{RootProdCYr} / \textcolor{cyan}{\text{CFracBiomass}^{
 The average water effect on photosynthesis:
 
 $$\text{AvgDWater} = \begin{cases}
-
-\text{Dwatertot} / \text{DwaterIx} & \text{DwaterIx} > 0 \\
-
-1 & \text{DwaterIx} \leq 0
-
+	\text{Dwatertot} / \text{DwaterIx} & \text{DwaterIx} > 0 \\
+	1 & \text{DwaterIx} \leq 0
 \end{cases}$$
 
 The average PCBM:
 
 $$\text{avgPCBM} = \begin{cases}
-
-\text{PosCbalMassTot} / \text{PosCBalMassIx} & \text{PosCBalMassIx} > 0 \\
-
-\text{FolMass} & \text{PosCBalMassIx} \leq 0
-
+	\text{PosCbalMassTot} / \text{PosCBalMassIx} & \text{PosCBalMassIx} > 0 \\
+	\text{FolMass} & \text{PosCBalMassIx} \leq 0
 \end{cases}$$
 
 $$\text{EnvMaxFol} = (\text{AvgDWater} \cdot \text{avgPCBM}) \cdot (1 + \text{FolRelGrowMax} \cdot \text{LightEffMin})$$

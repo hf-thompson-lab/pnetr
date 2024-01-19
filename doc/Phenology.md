@@ -17,6 +17,7 @@ Phenology controls the variation of variables in the carbon cycle, it divides th
 - summer - autumn: during which leaves start to senesce and fall off.
 - autumn - winter: during which no photosynthesis b/c the growing season ends.
 
+
 ## Winter - early spring (before SOS)
 
 This period is under the condition $\text{GDD}_{\text{total}}^m < \textcolor{cyan}{\text{GDDFolStart}}$. During this period no leaves are present, thus no photosynthesis is included in the process. Therefore, the following variables are 0:
@@ -28,6 +29,7 @@ This period is under the condition $\text{GDD}_{\text{total}}^m < \textcolor{cya
 - $\text{FolMass}^m = \text{FolMass}^{m-1}$
 - $\text{LAI}^m = \text{LAI}^{m-1}$
 - $\text{FolLitM}^m = 0$
+
 
 ## Spring - summer (SOS - Senesce)
 
@@ -52,6 +54,7 @@ $$\text{FolProdC}^m = \text{FolMass}_\text{grow}^m \cdot \textcolor{cyan}{\text{
 $$\text{FolGResp}^m = \text{FolProdC}^m \cdot \textcolor{cyan}{\text{GRespFrac}}$$
 
 where $\textcolor{cyan}{\text{GRespFrac}}$ is growth respiration as a fraction of allocation.
+
 
 ## Summer - autumn (Senesce - EOS)
 
