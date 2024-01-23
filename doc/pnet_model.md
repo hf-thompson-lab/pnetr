@@ -15,7 +15,7 @@ In this package, we currently provide PnET-II, PnET-Day, and PnET-CN. Note that 
 
 ## Model Overview
 
-> The model equations were extracted from the MATLAB code downloaded from the [official website](https://www.pnet.sr.unh.edu/).
+> The model equations were extracted from the MATLAB and C++ code downloaded from the [official website](https://www.pnet.sr.unh.edu/).
 
 Notations:
 
