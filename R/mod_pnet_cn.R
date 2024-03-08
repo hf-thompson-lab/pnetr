@@ -43,7 +43,18 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
 
     # Now, for each time step
     for (rstep in 1L:length(share$dt$DOY)) {
-        
+
+        if (rstep > 1) {
+            set(share$dt, rstep, "BudC", share$dt[rstep - 1, BudC])
+            set(share$dt, rstep, "RootC", share$dt[rstep - 1, RootC])
+            set(share$dt, rstep, "WoodC", share$dt[rstep - 1, WoodC])
+            set(share$dt, rstep, "PlantC", share$dt[rstep - 1, PlantC])
+        }
+
+        if (rstep == 40) {
+            bb <- 1
+        }
+
         # End of year activity
         if (rstep != 1 && share$dt$DOY[rstep] < share$dt$DOY[rstep - 1]) {
             set(share$dt, rstep, names(share$dt), AllocateYrPre(
@@ -90,7 +101,7 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
         #         sitepar, vegpar, share, rstep, model = "pnet-cn"
         #     ))
         # }
-       
+
         if (verbose == TRUE) {
             # update progress
             setTxtProgressBar(pb, rstep * 100 / length(share$dt$DOY))
