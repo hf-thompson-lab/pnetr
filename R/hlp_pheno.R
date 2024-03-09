@@ -27,10 +27,14 @@
 Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
     # Variables to update
     GDDFolEff <- FolMass <- FolProdCMo <- FolGRespMo <- NULL
-    FolMassNew <- LAI <- NULL
+    LAI <- NULL
 
     GDDTot <- share$logdt[rstep, GDDTot]
     DOY <- share$logdt[rstep, DOY]
+    # Note that if it's a new year, this should be 0
+    if (rstep != 1 && share$logdt[rstep, Year] > share$logdt[rstep - 1, Year]) {
+        share$vars$GDDFolEff <- 0
+    }
 
     if (phenophase == "grow") {
         # Within growing season but before senescence
@@ -46,8 +50,10 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
             
             FolProdCMo <- (FolMass - share$vars$FolMass) * vegpar$CFracBiomass
             FolGRespMo <- FolProdCMo * vegpar$GRespFrac
+        } else {
+            FolProdCMo <- 0
+            FolGRespMo <- 0
         }
-
     } else if (phenophase == "senesce") {
         if (share$vars$PosCBalMass < share$vars$FolMass && 
             DOY > vegpar$SenescStart
@@ -65,6 +71,8 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
             if (FolMassNew < share$vars$FolMass) {
                 share$vars$FolLitM <- share$vars$FolMass - FolMassNew
             }
+
+            FolMass <- FolMassNew
         }
 
     } else {
@@ -73,9 +81,17 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
 
 
     # Update values
+    if (!is.null(GDDTot)) {
+        share$vars$GDDTot <- GDDTot
+    }
+    if (!is.null(DOY)) {
+        share$vars$DOY <- DOY
+    }
+    
     if (!is.null(GDDFolEff)) {
         share$vars$GDDFolEff <- GDDFolEff
     }
+    
     if (!is.null(FolMass)) {
         share$vars$FolMass <- FolMass
     }
@@ -84,9 +100,6 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
     }
     if (!is.null(FolGRespMo)) {
         share$vars$FolGRespMo <- FolGRespMo
-    }
-    if (!is.null(FolMassNew)) {
-        share$vars$FolMassNew <- FolMassNew
     }
     if (!is.null(LAI)) {
         share$vars$LAI <- LAI

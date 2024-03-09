@@ -55,6 +55,11 @@ PnET_Day <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
 
     # Now, for each time step
     for (rstep in 1:length(share$logdt$DOY)) {
+        # Assign already calculated values
+        share$vars$GDD <- share$logdt[rstep, GDD]
+        share$vars$GDDTot <- share$logdt[rstep, GDDTot]
+        share$vars$DayResp <- share$logdt[rstep, DayResp]
+        share$vars$NightResp <- share$logdt[rstep, NightResp]
 
         Phenology(sitepar, vegpar, share, rstep, phenophase = "grow")
         Photosynthesis(climate_dt, sitepar, vegpar, share, rstep)
