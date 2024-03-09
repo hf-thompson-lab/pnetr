@@ -41,16 +41,21 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     # Previous time step
     prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
 
-    if (model == "pnet-ii") {
+    if (model %in% c("pnet-ii")) {
         # Since C allocation to bud, wood, and root happens annually, here for
         # the monthly scale, their previous values should be propogated.
         currow$BudC <- prerow$BudC
         currow$WoodC <- prerow$WoodC
         currow$RootC <- prerow$RootC
+        currow$RootC <- prerow$RootC
     }
 
     # Update plant C pool
-    currow$PlantC <- prerow$PlantC + currow$NetPsnMo - currow$FolGRespMo
+    if (model == "pnet-cn") {
+        currow$PlantC <- currow$PlantC + currow$NetPsnMo - currow$FolGRespMo
+    } else {
+        currow$PlantC <- prerow$PlantC + currow$NetPsnMo - currow$FolGRespMo
+    }
     
     # Wood maintenance respiration
     WoodMRespMo <- currow$CanopyGrossPsnActMo * vegpar$WoodMRespA
@@ -74,13 +79,13 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     WoodProdCMo <- 0
     WoodGRespMo <- 0
     # Wood production only happens within the growing season
-    if (currow$GDDTot >= vegpar$GDDFolStart) {
+    if (currow$GDDTot >= vegpar$GDDWoodStart) {
         # Growing degree day effect on wood production
         GDDWoodEff <- (currow$GDDTot - vegpar$GDDWoodStart) / 
             (vegpar$GDDWoodEnd - vegpar$GDDWoodStart)
         currow$GDDWoodEff <- max(0, min(1.0, GDDWoodEff))
         delGDDWoodEff <- currow$GDDWoodEff - prerow$GDDWoodEff
-        WoodProdCMo <- prerow$WoodC * delGDDWoodEff
+        WoodProdCMo <- currow$WoodC * delGDDWoodEff
         # Wood growth respiration is a fraction of wood production
         WoodGRespMo <- WoodProdCMo * vegpar$GRespFrac
 
@@ -357,10 +362,14 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
 
     # Inherit some variables
-    currow$BudC <- prerow$BudC
-    currow$WoodC <- prerow$WoodC
-    currow$RootC <- prerow$RootC
-    currow$PlantC <- prerow$PlantC
+    # currow$BudC <- prerow$BudC
+    # currow$WoodC <- prerow$WoodC
+    # currow$RootC <- prerow$RootC
+    # currow$PlantC <- prerow$PlantC
+
+    currow$NPPFolYr <- prerow$FolProdCYr / vegpar$CFracBiomass
+    currow$NPPWoodYr <- prerow$WoodProdCYr / vegpar$CFracBiomass
+    currow$NPPRootYr <- prerow$RootProdCYr / vegpar$CFracBiomass
 
     if (model == "pnet-cn") {
         currow$PlantN <- prerow$PlantN
@@ -368,10 +377,6 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         # currow$NH4 <- prerow$NH4
         # currow$NRatioNit <- prerow$NRatioNit
     }
-
-    currow$NPPFolYr <- prerow$FolProdCYr / vegpar$CFracBiomass
-    currow$NPPWoodYr <- prerow$WoodProdCYr / vegpar$CFracBiomass
-    currow$NPPRootYr <- prerow$RootProdCYr / vegpar$CFracBiomass
 
     AvgDWater <- ifelse(prerow$DwaterIx > 0, 
         prerow$Dwatertot / prerow$DwaterIx,
@@ -395,7 +400,7 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         (vegpar$FolMassMax - prerow$FolMass) * vegpar$CFracBiomass
     )
     
-    currow$PlantC <- prerow$PlantC - currow$BudC
+    currow$PlantC <- currow$PlantC - currow$BudC
     currow$WoodC <- (1 - vegpar$PlantCReserveFrac) * currow$PlantC
     currow$PlantC <- currow$PlantC - currow$WoodC
 
@@ -439,6 +444,7 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
                 BudN <- BudN * (currow$PlantN / BudN)
             }
         }
+        currow$BudN <- BudN
 
         # Foliar 
         folnconnew <- (prerow$FolMass * (vegpar$FolNCon / 100) + BudN) /
@@ -475,7 +481,7 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         currow$FolC <- prerow$FolMass * vegpar$CFracBiomass
 
         currow$TotalN <- currow$FolN + prerow$WoodMassN + prerow$RootMassN + 
-            prerow$HON + prerow$NH4 + prerow$NO3 + prerow$BudN + 
+            prerow$HON + prerow$NH4 + prerow$NO3 + currow$BudN + 
             prerow$DeadWoodN + currow$PlantN
 
         currow$TotalM <- (currow$BudC / vegpar$CFracBiomass) + prerow$FolMass + 

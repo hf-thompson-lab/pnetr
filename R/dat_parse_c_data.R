@@ -23,8 +23,8 @@ ReadCData <- function(testfilename) {
 
     clim_dt <- fread(climate_filename)
 
-    sitepar <- SitePar$new("data/site_par.csv")
-    vegpar <- VegPar$new("data/veg_par.csv")
+    sitepar <- SitePar$new()
+    vegpar <- VegPar$new()
 
 
     site_settings_start_line <- grep("Site settings", txt)

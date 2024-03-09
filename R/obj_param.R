@@ -9,7 +9,11 @@ Param <- R6::R6Class("Param",
 
     public = list(
         # Init the parameters using a csv file
-        initialize = function(csv_file) {
+        initialize = function(csv_file = NULL) {
+            if (is.null(csv_file)) {
+                return(self)
+            }
+            
             par_dt <- read.csv(csv_file)
             for (col_name in colnames(par_dt)) {
                 if (!is.null(self[[col_name]])) {

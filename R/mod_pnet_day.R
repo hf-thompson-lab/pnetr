@@ -23,30 +23,30 @@ PnET_Day <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     share <- ShareVars$new(climate_dt, vegpar)
 
     # These parameters can be calculated at once, can save some computing time
-    AtmEnviron(climate_dt, sitepar$Lat, share$dt)
-    share$Amax <- vegpar$AmaxA + vegpar$AmaxB * vegpar$FolNCon
-    share$Amax_d <- share$Amax * vegpar$AmaxFrac
-    share$BaseFolResp <- share$Amax * vegpar$BaseFolRespFrac
+    AtmEnviron(climate_dt, sitepar$Lat, share$logdt)
+    share$glb$Amax <- vegpar$AmaxA + vegpar$AmaxB * vegpar$FolNCon
+    share$glb$Amax_d <- share$glb$Amax * vegpar$AmaxFrac
+    share$glb$BaseFolResp <- share$glb$Amax * vegpar$BaseFolRespFrac
 
     # Realized daytime respiration
-    share$dt[, DayResp := CalRealizedResp(
-        share$BaseFolResp, vegpar$RespQ10,
-        share$dt$Tday, vegpar$PsnTOpt, share$dt$Daylen
+    share$logdt[, DayResp := CalRealizedResp(
+        share$glb$BaseFolResp, vegpar$RespQ10,
+        share$logdt$Tday, vegpar$PsnTOpt, share$logdt$Daylen
     )]
     # Realized nighttime respiration
-    share$dt[, NightResp := CalRealizedResp(
-        share$BaseFolResp, vegpar$RespQ10, share$dt$Tnight,
-        vegpar$PsnTOpt, share$dt$Nightlen
+    share$logdt[, NightResp := CalRealizedResp(
+        share$glb$BaseFolResp, vegpar$RespQ10, share$logdt$Tnight,
+        vegpar$PsnTOpt, share$logdt$Nightlen
     )]
 
     # Calculate temperature effect
-    share$dt[, DTemp := CalDTemp(
+    share$logdt[, DTemp := CalDTemp(
         Tday, Tmin, vegpar$PsnTOpt, vegpar$PsnTMin,
         GDDTot, vegpar$GDDFolEnd, Dayspan
     )]
 
     # Calculate DVPD effect
-    share$dt[, DVPD := 1 - vegpar$DVPD1 * share$dt$VPD^vegpar$DVPD2]
+    share$logdt[, DVPD := 1 - vegpar$DVPD1 * share$logdt$VPD^vegpar$DVPD2]
 
     # Create a progress bar
     if (verbose == TRUE) {
@@ -54,27 +54,17 @@ PnET_Day <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     }
 
     # Now, for each time step
-    for (rstep in 1:length(share$dt$DOY)) {
-        set(share$dt, rstep, names(share$dt), Phenology(
-            sitepar, vegpar, share, rstep,
-            phenophase = "grow"
-        ))
-        set(share$dt, rstep, names(share$dt), Photosynthesis(
-            climate_dt, sitepar, vegpar, share, rstep
-        ))
-        set(share$dt, rstep, names(share$dt), Phenology(
-            sitepar, vegpar, share, rstep,
-            phenophase = "senesce"
-        ))
+    for (rstep in 1:length(share$logdt$DOY)) {
 
-        # End of year activity
-        if (share$dt[rstep, Month] == 12) {
-            
-        }
+        Phenology(sitepar, vegpar, share, rstep, phenophase = "grow")
+        Photosynthesis(climate_dt, sitepar, vegpar, share, rstep)
+        Phenology(sitepar, vegpar, share, rstep, phenophase = "senesce")
+
+        share$logvars(rstep)
 
         if (verbose == TRUE) {
             # update progress
-            setTxtProgressBar(pb, rstep * 100 / length(share$dt$DOY))
+            setTxtProgressBar(pb, rstep * 100 / length(share$logdt$DOY))
         }
     }
 
