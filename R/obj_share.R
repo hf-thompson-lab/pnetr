@@ -81,9 +81,9 @@ ShareVars <- R6::R6Class("ShareVars",
             # Water stress effect on photosynthesis
             DWater = 0,
             # Annual accumulated DWater effect
-            Dwatertot = 0,
+            DWatertot = 0,
             # TODO: what is this? (days)
-            DwaterIx = 0,
+            DWaterIx = 0,
             
             # Drainage rate (cm)
             Drainage = 0,

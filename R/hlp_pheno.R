@@ -31,10 +31,6 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
 
     GDDTot <- share$logdt[rstep, GDDTot]
     DOY <- share$logdt[rstep, DOY]
-    # Note that if it's a new year, this should be 0
-    if (rstep != 1 && share$logdt[rstep, Year] > share$logdt[rstep - 1, Year]) {
-        share$vars$GDDFolEff <- 0
-    }
 
     if (phenophase == "grow") {
         # Within growing season but before senescence

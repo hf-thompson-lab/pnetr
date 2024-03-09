@@ -10,8 +10,6 @@
 #' 
 #' @description
 #' The following variables are calculated/updated:
-#' - BudC
-#' - WoodC
 #' - RootC
 #' - PlantC
 #' - WoodMRespYr
@@ -36,110 +34,84 @@
 #' @param share The shared object containing intermittent variables.
 #' @param rstep current time step
 AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
-    # Current time step
-    currow <- share$dt[rstep, ]
-    # Previous time step
-    prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+    # Variables to update
+    RootC <- PlantC <- NULL
+    WoodMRespYr <- RootGRespYr <- FolProdCYr <- FolGRespYr <- NULL
+    GDDWoodEff <- NULL
+    WoodProdCYr <- WoodGRespYr <- RootProdCYr <- RootMRespYr <- NULL
+    NetCBal <- NULL
+    # For PnET-CN
+    WoodMass <- WoodMassN <- RootMass <- RootMassN <- PlantN <- NULL
 
-    if (model %in% c("pnet-ii")) {
-        # Since C allocation to bud, wood, and root happens annually, here for
-        # the monthly scale, their previous values should be propogated.
-        currow$BudC <- prerow$BudC
-        currow$WoodC <- prerow$WoodC
-        currow$RootC <- prerow$RootC
-        currow$RootC <- prerow$RootC
-    }
+    # Some already calculated variables at this time step
+    GDDTot <- share$logdt[rstep, GDDTot]
+    Tavg <- share$logdt[rstep, Tavg]
+    Dayspan <- share$logdt[rstep, Dayspan]
+
 
     # Update plant C pool
+    PlantC <- share$vars$PlantC + share$vars$NetPsnMo - share$vars$FolGRespMo
     if (model == "pnet-cn") {
-        currow$PlantC <- currow$PlantC + currow$NetPsnMo - currow$FolGRespMo
-    } else {
-        currow$PlantC <- prerow$PlantC + currow$NetPsnMo - currow$FolGRespMo
+        PlantC <- PlantC + NetPsnMo - FolGRespMo
     }
     
     # Wood maintenance respiration
-    WoodMRespMo <- currow$CanopyGrossPsnActMo * vegpar$WoodMRespA
-    currow$WoodMRespYr <- ifelse(currow$Year == prerow$Year,
-        prerow$WoodMRespYr + WoodMRespMo,
-        currow$WoodMRespYr + WoodMRespMo
-    )
-    
+    WoodMRespMo <- share$vars$CanopyGrossPsnActMo * vegpar$WoodMRespA
+    WoodMRespYr <- share$vars$WoodMRespYr + WoodMRespMo
     # Foliar C production
-    currow$FolProdCYr <- ifelse(currow$Year == prerow$Year,
-        prerow$FolProdCYr + currow$FolProdCMo,
-        currow$FolProdCYr + currow$FolProdCMo
-    )
+    FolProdCYr <- share$vars$FolProdCYr + share$vars$FolProdCMo
     # Foliar C growth respiration
-    currow$FolGRespYr <- ifelse(currow$Year == prerow$Year, 
-        prerow$FolGRespYr + currow$FolGRespMo,
-        currow$FolGRespYr + currow$FolGRespMo
-    )
+    FolGRespYr <- share$vars$FolGRespYr + share$vars$FolGRespMo
 
     # Update Wood carbon production and growth respiration
     WoodProdCMo <- 0
     WoodGRespMo <- 0
     # Wood production only happens within the growing season
-    if (currow$GDDTot >= vegpar$GDDWoodStart) {
+    if (GDDTot >= vegpar$GDDWoodStart) {
         # Growing degree day effect on wood production
-        GDDWoodEff <- (currow$GDDTot - vegpar$GDDWoodStart) / 
+        GDDWoodEff <- (GDDTot - vegpar$GDDWoodStart) / 
             (vegpar$GDDWoodEnd - vegpar$GDDWoodStart)
-        currow$GDDWoodEff <- max(0, min(1.0, GDDWoodEff))
-        delGDDWoodEff <- currow$GDDWoodEff - prerow$GDDWoodEff
-        WoodProdCMo <- currow$WoodC * delGDDWoodEff
+        GDDWoodEff <- max(0, min(1.0, GDDWoodEff))
+        delGDDWoodEff <- GDDWoodEff - share$vars$GDDWoodEff
+        WoodProdCMo <- share$vars$WoodC * delGDDWoodEff
         # Wood growth respiration is a fraction of wood production
         WoodGRespMo <- WoodProdCMo * vegpar$GRespFrac
 
-        currow$WoodProdCYr <- ifelse(currow$Year == prerow$Year, 
-            prerow$WoodProdCYr + WoodProdCMo,
-            currow$WoodProdCYr + WoodProdCMo
-        )
-        currow$WoodGRespYr <- ifelse(currow$Year == prerow$Year,
-            prerow$WoodGRespYr + WoodGRespMo,
-            currow$WoodGRespYr + WoodGRespMo
-        )
+        WoodProdCYr <- share$vars$WoodProdCYr + WoodProdCMo
+        WoodGRespYr <- share$vars$WoodGRespYr + WoodGRespMo
     }
 
     # Root C production
     # We first calculate a prorated root production for this month based on the
     # foliar production of this month. Then, we calculate the montly root C
     # production. # TODO: comment incomplete.
-    TMult <- exp(0.1 * (currow$Tavg - 7.1)) * 0.68
-    RootCAdd <- vegpar$RootAllocA * (currow$Dayspan / 365.0) + 
-        vegpar$RootAllocB * currow$FolProdCMo
+    TMult <- exp(0.1 * (Tavg - 7.1)) * 0.68
+    RootCAdd <- vegpar$RootAllocA * (Dayspan / 365.0) + 
+        vegpar$RootAllocB * share$vars$FolProdCMo
+    RootC <- share$vars$RootC + RootCAdd
     
-    currow$RootC <- prerow$RootC + RootCAdd
-    
-    RootAllocCMo <- min(1.0, ((1.0 / 12.0) * TMult)) * currow$RootC
-    currow$RootC <- currow$RootC - RootAllocCMo
+    RootAllocCMo <- min(1.0, ((1.0 / 12.0) * TMult)) * RootC
+    RootC <- RootC - RootAllocCMo
 
     # Root C productioon
     RootProdCMo <- RootAllocCMo / 
         (1.0 + vegpar$RootMRespFrac + vegpar$GRespFrac)
-    
-    currow$RootProdCYr <- ifelse(currow$Year == prerow$Year,
-        prerow$RootProdCYr + RootProdCMo,
-        currow$RootProdCYr + RootProdCMo
-    )
+    RootProdCYr <- share$vars$RootProdCYr + RootProdCMo
     
     # Root C maintenance respiration
     RootMRespMo <- RootProdCMo * vegpar$RootMRespFrac
-    currow$RootMRespYr <- ifelse(currow$Year == prerow$Year,
-        prerow$RootMRespYr + RootMRespMo,
-        currow$RootMRespYr + RootMRespMo
-    )
+    RootMRespYr <- share$vars$RootMRespYr + RootMRespMo
+    
     # Root C growth respiration
     RootGRespMo <- RootProdCMo * vegpar$GRespFrac
-    currow$RootGRespYr <- ifelse(currow$Year == prerow$Year,
-        prerow$RootGRespYr + RootGRespMo,
-        currow$RootGRespYr + RootGRespMo
-    )
+    RootGRespYr <- share$vars$RootGRespYr + RootGRespMo
     
     # Update plant C pool
-    currow$PlantC <- currow$PlantC - RootCAdd - WoodMRespMo - WoodGRespMo
+    PlantC <- PlantC - RootCAdd - WoodMRespMo - WoodGRespMo
 
     # Calculate net C balance
-    currow$NetCBal <- currow$NetPsnMo - currow$SoilRespMo - 
-        WoodMRespMo - WoodGRespMo - currow$FolGRespMo
+    NetCBal <- share$vars$NetPsnMo - share$vars$SoilRespMo - 
+        WoodMRespMo - WoodGRespMo - share$vars$FolGRespMo
 
     if (model == "pnet-cn") {
         # These values only change once a year, should be passed along steps
@@ -185,8 +157,39 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         
     }
 
-    return(currow)
+
+    # Update variables
+    share$vars$RootC <- RootC
+    share$vars$PlantC <- PlantC
+    
+    share$vars$WoodMRespYr <- WoodMRespYr
+    share$vars$RootGRespYr <- RootGRespYr
+    share$vars$FolProdCYr <- FolProdCYr
+    share$vars$FolGRespYr <- FolGRespYr
+    
+    if (!is.null(GDDWoodEff)) {
+        share$vars$GDDWoodEff <- GDDWoodEff
+    }
+    if (!is.null(WoodProdCYr)) {
+        share$vars$WoodProdCYr <- WoodProdCYr
+    }
+    if (!is.null(WoodGRespYr)) {
+        share$vars$WoodGRespYr <- WoodGRespYr
+    }
+    share$vars$RootProdCYr <- RootProdCYr
+    share$vars$RootMRespYr <- RootMRespYr
+    share$vars$NetCBal <- NetCBal
+    
+    # For PnET-CN
+    if (model == "pnet-cn") {
+        share$vars$WoodMass <- WoodMass
+        share$vars$WoodMassN <- WoodMassN
+        share$vars$RootMass <- RootMass
+        share$vars$RootMassN <- RootMassN
+        share$vars$PlantN <- PlantN
+    }
 }
+
 
 
 #' Annual C and/or N allocation
@@ -195,7 +198,6 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
 #' The following variables are calculated/updated:
 #' - BudC
 #' - WoodC
-#' - RootC
 #' - PlantC
 #' - NPPFolYr
 #' - NPPWoodYr
@@ -223,53 +225,54 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
 #' @param share The shared object containing intermittent variables.
 #' @param rstep current time step
 AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
-    # Current time step
-    currow <- share$dt[rstep, ]
-    # Previous time step
-    prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+    # Variables to update
+    BudC <- WoodC <- PlantC <- NULL
+    NPPFolYr <- NPPWoodYr <- NPPRootYr <- NULL
+    FolMassMax <- FolMassMin <- NULL # in VegPar
+    NEP <- NULL
 
-    currow$NPPFolYr <- currow$FolProdCYr / vegpar$CFracBiomass
-    currow$NPPWoodYr <- currow$WoodProdCYr / vegpar$CFracBiomass
-    currow$NPPRootYr <- currow$RootProdCYr / vegpar$CFracBiomass
+    NPPFolYr <- share$vars$FolProdCYr / vegpar$CFracBiomass
+    NPPWoodYr <- share$vars$WoodProdCYr / vegpar$CFracBiomass
+    NPPRootYr <- share$vars$RootProdCYr / vegpar$CFracBiomass
 
-    AvgDWater <- ifelse(currow$DwaterIx > 0, 
-        currow$Dwatertot / currow$DwaterIx,
+    AvgDWater <- ifelse(share$vars$DWaterIx > 0, 
+        share$vars$DWatertot / share$vars$DWaterIx,
         1
     )
 
-    avgPCBM <- ifelse(currow$PosCBalMassIx > 0,
-        currow$PosCBalMassTot / currow$PosCBalMassIx,
-        currow$FolMass
+    avgPCBM <- ifelse(share$vars$PosCBalMassIx > 0,
+        share$vars$PosCBalMassTot / share$vars$PosCBalMassIx,
+        share$vars$FolMass
     )
 
     EnvMaxFol <- (AvgDWater * avgPCBM) * 
-        (1 + (vegpar$FolRelGrowMax * share$LightEffMin))
-    SppMaxFol <- avgPCBM * (1 + vegpar$FolRelGrowMax * share$LightEffMin)
+        (1 + (vegpar$FolRelGrowMax * share$vars$LightEffMin))
+    SppMaxFol <- avgPCBM * (1 + vegpar$FolRelGrowMax * share$vars$LightEffMin)
     vegpar$FolMassMax <- min(EnvMaxFol, SppMaxFol)
     vegpar$FolMassMin <- vegpar$FolMassMax - 
         vegpar$FolMassMax * (1 / vegpar$FolReten)
     
-    currow$BudC <- max(
+    BudC <- max(
         0, 
-        (vegpar$FolMassMax - currow$FolMass) * vegpar$CFracBiomass
+        (vegpar$FolMassMax - share$vars$FolMass) * vegpar$CFracBiomass
     )
-    
-    currow$PlantC <- currow$PlantC - currow$BudC
-    currow$WoodC <- (1 - vegpar$PlantCReserveFrac) * currow$PlantC
-    currow$PlantC <- currow$PlantC - currow$WoodC
 
-    if (currow$WoodC < (vegpar$MinWoodFolRatio * currow$BudC)) {
-        TotalC <- currow$WoodC + currow$BudC
-        currow$WoodC <- TotalC * (
+    PlantC <- share$vars$PlantC - BudC
+    WoodC <- (1 - vegpar$PlantCReserveFrac) * PlantC
+    PlantC <- PlantC - WoodC
+
+    if (WoodC < (vegpar$MinWoodFolRatio * BudC)) {
+        TotalC <- WoodC + BudC
+        WoodC <- TotalC * (
             vegpar$MinWoodFolRatio / (1 + vegpar$MinWoodFolRatio)
         )
-        vegpar$FolMassMax <- currow$FolMass + currow$BudC / vegpar$CFracBiomass
+        vegpar$FolMassMax <- share$vars$FolMass + BudC / vegpar$CFracBiomass
         vegpar$FolMassMin <- vegpar$FolMassMax - 
             vegpar$FolMassMin * (1 / vegpar$FolReten)
     }
 
-    currow$NEP <- currow$TotPsn - currow$WoodMRespYr - currow$WoodGRespYr - 
-        currow$FolGRespYr - currow$SoilRespYr
+    NEP <- share$vars$TotPsn - share$vars$WoodMRespYr - share$vars$WoodGRespYr - 
+        share$vars$FolGRespYr - share$vars$SoilRespYr
 
 
     if (model == "pnet-cn") {
@@ -345,7 +348,15 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         share$NetNMinLastYr <- currow$NetNMinYr
     }
 
-    return(currow)
+    
+    # Update values
+    share$vars$BudC <- BudC
+    share$vars$WoodC <- WoodC
+    share$vars$PlantC <- PlantC
+    share$vars$NPPFolYr <- NPPFolYr
+    share$vars$NPPWoodYr <- NPPWoodYr
+    share$vars$NPPRootYr <- NPPRootYr
+    share$vars$NEP <- NEP
 }
 
 
@@ -378,8 +389,8 @@ AllocateYrPre <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         # currow$NRatioNit <- prerow$NRatioNit
     }
 
-    AvgDWater <- ifelse(prerow$DwaterIx > 0, 
-        prerow$Dwatertot / prerow$DwaterIx,
+    AvgDWater <- ifelse(prerow$DWaterIx > 0, 
+        prerow$DWatertot / prerow$DWaterIx,
         1
     )
 

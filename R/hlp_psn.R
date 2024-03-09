@@ -78,7 +78,7 @@ CalCO2effectConductance <- function(Ca, DelAmax, CiElev, Ci350, sitepar) {
 #' - CanopyGrossPsn
 #' - PosCBalMassTot
 #' - PosCBalMassIx
-#' - LightEffMin (in Share)
+#' - LightEffMin
 #' 
 #' @param climate_dt A table that contains monthly climate data.
 #' @param sitepar A table that contains site-specific variables.
@@ -214,6 +214,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             }
         }
 
+        LightEffMin <- min(LightEffMin, LightEff)
 
         if (DTemp > 0 && GDDTot > vegpar$GDDFolEnd &&
             climate_dt[rstep, DOY] < vegpar$SenescStart
