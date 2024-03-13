@@ -15,18 +15,17 @@
 #' @param share The shared object containing intermittent variables.
 #' @param rstep current time step
 Leach <- function(share, rstep) {
-    # Current time step
-    currow <- share$dt[rstep, ]
-    # Previous time step
-    prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+    # Variables to update
+    NDrainYr <- NULL
+    NO3 <- NULL
 
-    NDrain <- currow$FracDrain * currow$NO3
-    currow$NDrainYr <- ifelse(currow$Year == prerow$Year,
-        prerow$NDrainYr + NDrain,
-        currow$NDrainYr + NDrain
-    )
+    NDrain <- share$vars$FracDrain * share$vars$NO3
+    NDrainYr <- share$vars$NDrainYr + NDrain
 
-    currow$NO3 <- currow$NO3 - NDrain
+    NO3 <- share$vars$NO3 - NDrain
 
-    return(currow)
+    
+    # Update variables
+    share$vars$NDrainYr <- NDrainYr
+    share$vars$NO3 <- NO3
 }

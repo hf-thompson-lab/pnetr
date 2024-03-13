@@ -55,6 +55,8 @@ CalSnowMelt <- function(SnowPack, Tavg, Dayspan) {
 #' - TotEvap
 #' - TotGrossPsn
 #' - ET
+#' ---- For PnET-CN
+#' - CanopyDO3Pot
 #' 
 #' @param climate_dt A table that contains monthly climate data.
 #' @param sitepar A table that contains site-specific variables.
@@ -70,6 +72,11 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     MeanSoilMoistEff <- NULL
     CanopyGrossPsnActMo <- GrsPsnMo <- NetPsnMo <- TotPsn <- TotGrossPsn <- NULL
     Drainage <- TotTrans <- TotDrain <- TotPrec <- TotEvap <- ET <- NULL
+
+    if (model == "pnet-cn") {
+        CanopyDO3 <- DroughtO3Frac <- NULL
+        FracDrain <- NULL
+    }
 
     # Some already caculated variables at this time step
     Tavg <- share$logdt[rstep, Tavg]
@@ -148,21 +155,21 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
 
     if (model == "pnet-cn") {
         # Calculate actural ozone effect and NetPsn with drought stress
-        if (climate_dt$O3[rstep] > 0 && currow$CanopyGrossPsn > 0) {
-            CanopyDO3 <- ifelse(currow$WUEO3Eff == 0,
+        if (climate_dt$O3[rstep] > 0 && share$vars$CanopyGrossPsn > 0) {
+            CanopyDO3 <- ifelse(share$vars$WUEO3Eff == 0,
                 # No O3 effect on WUE (assumes no stomatal imparement)
-                currow$CanopyDO3Pot + 
-                    (1 - currow$CanopyDO3Pot) * (1 - currow$DWater),
+                share$vars$CanopyDO3Pot + 
+                    (1 - share$vars$CanopyDO3Pot) * (1 - share$vars$DWater),
                 # Reduce the degree to which drought offsets O3 (assumes
                 # stomatal imparement in proportion to effects on psn)
-                currow$CanopyDO3Pot + 
-                    (1 - currow$CanopyDO3Pot) * 
-                    (1 - currow$DWater / currow$CanopyDO3Pot)
+                share$vars$CanopyDO3Pot + 
+                    (1 - share$vars$CanopyDO3Pot) * 
+                    (1 - share$vars$DWater / share$vars$CanopyDO3Pot)
             )
-            currow$DroughtO3Frac <- currow$CanopyDO3Pot / CanopyDO3
+            DroughtO3Frac <- share$vars$CanopyDO3Pot / CanopyDO3
         } else {
             CanopyDO3 <- 1
-            currow$DroughtO3Frac <- 1
+            DroughtO3Frac <- 1
         }
     }
 
@@ -199,10 +206,7 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     ET <- Trans + Evap
 
     TotWater <- share$vars$TotWater + Water
-    
-    if (model == "pnet-cn") {
-        FracDrain <- Drainage / (Water + prec)
-    }
+
 
     # Update variables
     share$vars$Water <- Water
@@ -225,4 +229,15 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     share$vars$TotEvap <- TotEvap
     share$vars$ET <- ET
     
+    if (model == "pnet-cn") {
+        if (!is.null(CanopyDO3)) {
+            share$vars$CanopyDO3 <- CanopyDO3
+        }
+        if (!is.null(DroughtO3Frac)) {
+            share$vars$DroughtO3Frac <- DroughtO3Frac
+        }
+        
+        share$vars$FracDrain <- Drainage / (Water + prec)
+    }
+
 }

@@ -47,6 +47,23 @@ YearInit <- function(share) {
     share$vars$GDDWoodEff <- 0
     share$vars$PosCBalMassTot <- 0
     share$vars$PosCBalMassIx <- 0
-    share$vars$Dwatertot <- 0
-    share$vars$DwaterIx <- 0
+    share$vars$DWatertot <- 0
+    share$vars$DWaterIx <- 0
+
+    # For PnET-CN
+    share$vars$NDrainYr <- 0
+    share$vars$NetNMinYr <- 0
+    share$vars$GrossNMinYr <- 0
+    share$vars$PlantNUptakeYr <- 0
+    share$vars$GrossNImmobYr <- 0
+    share$vars$TotalLitterMYr <- 0
+    share$vars$TotalLitterNYr <- 0
+    share$vars$NetNitrYr <- 0
+    share$vars$LightEffMin <- 1
+    share$vars$SoilDecRespYr <- 0
+    share$vars$WoodDecRespYr <- 0
+    share$vars$NetNMinLastYr <- share$vars$NetNMinYr
+    share$vars$NdepTot <- 0.0
+
+    share$glb$O3Effect <- numeric(50)
 }

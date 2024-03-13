@@ -31,73 +31,76 @@
 #' @param share The shared object containing intermittent variables.
 #' @param rstep current time step
 Decomp <- function(climate_dt, sitepar, vegpar, share, rstep) {
-    # Current time step
-    currow <- share$dt[rstep, ]
-    # Previous time step
-    prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+    # Variables to update
+    NO3 <- NH4 <- NdepTot <- NULL
+    GrossNMinYr <- NULL
+    SoilDecResp <- SoilDecRespYr <- NULL
+    NetCBal <- NULL
+    GrossNImmobYr <- NULL
+    HON <- HOM <- NULL
+    PlantN <- PlantNUptakeYr <- NULL
+    NetNMin <- NetNitrYr <- NULL
 
-    dayspan <- currow$Dayspan
+    # Some already calculated variables at this time step
+    Dayspan <- share$logdt[rstep, Dayspan]
+    Tavg <- share$logdt[rstep, Tavg]
+    DOY <- share$logdt[rstep, DOY]
+
 
     # Atmospheric N deposition
-    NO3 <- prerow$NO3 + climate_dt[rstep, NO3dep]
-    NH4 <- prerow$NH4 + climate_dt[rstep, NH4dep]
-    currow$NdepTot <- prerow$NdepTot + climate_dt[rstep, NO3dep] + 
+    NO3 <- share$vars$NO3 + climate_dt[rstep, NO3dep]
+    NH4 <- share$vars$NH4 + climate_dt[rstep, NH4dep]
+    NdepTot <- share$vars$NdepTot + climate_dt[rstep, NO3dep] + 
         climate_dt[rstep, NH4dep]
 
     # Temperature effect on all soil processes
-    tEffSoil <- max(currow$Tavg, 1)
+    tEffSoil <- max(Tavg, 1)
+    TMult <- (exp(0.1 * (Tavg - 7.1)) * 0.68) * 1;
+    WMult <- share$vars$MeanSoilMoistEff
 
-    HOM <- prerow$HOM + currow$TotalLitterM
-    HON <- prerow$HON + currow$TotalLitterN
+    # Add litter to the humus pool
+    HOM <- share$vars$HOM + share$vars$TotalLitterM
+    HON <- share$vars$HON + share$vars$TotalLitterN
 
-    TMult <- (exp(0.1 * (currow$Tavg - 7.1)) * 0.68) * 1;
-    WMult <- currow$MeanSoilMoistEff
-    KhoAct <- vegpar$Kho * (dayspan / 365)
+    # Humus dynamics
+    KhoAct <- vegpar$Kho * (Dayspan / 365)
     DHO <- HOM * (1 - exp(-KhoAct * TMult * WMult))
-
+    
     GrossNMin <- DHO * (HON / HOM)
-    currow$GrossNMinYr <- ifelse(currow$Year == prerow$Year,
-        prerow$GrossNMinYr + GrossNMin,
-        currow$GrossNMinYr + GrossNMin
-    )
-    currow$SoilDecResp <- DHO * vegpar$CFracBiomass
-    currow$SoilDecRespYr <- ifelse(currow$Year == prerow$Year,
-        prerow$SoilDecRespYr + currow$SoilDecResp,
-        currow$SoilDecRespYr + currow$SoilDecResp
-    )
+    GrossNMinYr <- share$vars$GrossNMinYr + GrossNMin
+
+    SoilDecResp <- DHO * vegpar$CFracBiomass
+    SoilDecRespYr <- share$vars$SoilDecRespYr + SoilDecResp
 
     # Update HON and HOM
-    HON <- HON - GrossNMin
     HOM <- HOM - DHO
+    HON <- HON - GrossNMin
 
-    currow$NetCBal <- currow$NetCBal - currow$SoilDecResp
+    NetCBal <- share$vars$NetCBal - SoilDecResp
 
     # Immobilization and net mineralization
     SoilPctN <- (HON / HOM) * 100
     NReten <- (vegpar$NImmobA + vegpar$NImmobB * SoilPctN) / 100
     GrossNImmob <- NReten * GrossNMin
-    currow$GrossNImmobYr <- ifelse(currow$Year == prerow$Year,
-        prerow$GrossNImmobYr + GrossNImmob,
-        currow$GrossNImmobYr + GrossNImmob
-    )
-    # Update HON and HOM again
-    currow$HON <- HON + GrossNImmob
-    currow$HOM <- HOM
+    GrossNImmobYr <- share$vars$GrossNImmobYr + GrossNImmob
+    
+    # Update HOM again
+    HON <- HON + GrossNImmob
 
     # Net mineralization
     NetNMin <- GrossNMin - GrossNImmob
 
     # Update NH4
     NH4 <- NH4 + NetNMin
-    NetNitr <- NH4 * currow$NRatioNit
+    NetNitr <- NH4 * share$vars$NRatioNit
     NO3 <- NO3 + NetNitr
     NH4 <- NH4 - NetNitr
 
     # Plant uptake
-    RootNSinkStr <- min(currow$RootNSinkEff * TMult, 0.98)
+    RootNSinkStr <- min(share$vars$RootNSinkEff * TMult, 0.98)
     PlantNUptake <- (NH4 + NO3) * RootNSinkStr
-    if ((PlantNUptake + currow$PlantN) > vegpar$MaxNStore) {
-        PlantNUptake <- vegpar$MaxNStore - currow$PlantN
+    if ((PlantNUptake + share$vars$PlantN) > vegpar$MaxNStore) {
+        PlantNUptake <- vegpar$MaxNStore - share$vars$PlantN
         RootNSinkStr <- PlantNUptake / (NO3 + NH4)
     }
 
@@ -105,25 +108,54 @@ Decomp <- function(climate_dt, sitepar, vegpar, share, rstep) {
         PlantNUptake <- 0
         RootNSinkStr <- 0
     }
-    currow$PlantN <- currow$PlantN + PlantNUptake
-    currow$PlantNUptakeYr <- ifelse(currow$Year == prerow$Year,
-        prerow$PlantNUptakeYr + PlantNUptake,
-        currow$PlantNUptakeYr + PlantNUptake
-    )
+    PlantN <- share$vars$PlantN + PlantNUptake
+    PlantNUptakeYr <- share$vars$PlantNUptakeYr + PlantNUptake
 
     NH4Up <- NH4 * RootNSinkStr
-    currow$NH4 <- NH4 - NH4Up
+    NH4 <- NH4 - NH4Up
     NO3Up <- NO3 * RootNSinkStr
-    currow$NO3 <- NO3 - NO3Up
+    NO3 <- NO3 - NO3Up
 
-    currow$NetNMinYr <- ifelse(currow$Year == prerow$Year,
-        prerow$NetNMinYr + NetNMin,
-        currow$NetNMinYr + NetNMin
-    )
-    currow$NetNitrYr <- ifelse(currow$Year == prerow$Year,
-        prerow$NetNitrYr + NetNitr,
-        currow$NetNitrYr + NetNitr
-    )
+    NetNMinYr <- share$vars$NetNMinYr + NetNMin
+    NetNitrYr <- share$vars$NetNitrYr + NetNitr
 
-    return(currow)
+
+    # Update values
+    if (!is.null(NO3)) {
+        share$vars$NO3 <- NO3
+    }
+    if (!is.null(NH4)) {
+        share$vars$NH4 <- NH4
+    }
+    if (!is.null(NdepTot)) {
+        share$vars$NdepTot <- NdepTot
+    }
+    if (!is.null(GrossNMinYr)) {
+        share$vars$GrossNMinYr <- GrossNMinYr
+    }
+    if (!is.null(GrossNImmobYr)) {
+        share$vars$GrossNImmobYr <- GrossNImmobYr
+    }
+    if (!is.null(SoilDecResp) && !is.null(SoilDecRespYr)) {
+        share$vars$SoilDecResp <- SoilDecResp
+        share$vars$SoilDecRespYr <- SoilDecRespYr
+    }
+    if (!is.null(NetCBal)) {
+        share$vars$NetCBal <- NetCBal
+    }
+    if (!is.null(HON) && !is.null(HOM)) {
+        share$vars$HON <- HON
+        share$vars$HOM <- HOM
+    }
+    if (!is.null(PlantN) && !is.null(PlantNUptake)) {
+        share$vars$PlantN <- PlantN
+        share$vars$PlantNUptake <- PlantNUptake
+        share$vars$PlantNUptakeYr <- PlantNUptakeYr
+    }
+    if (!is.null(NetNMin) && !is.null(NetNitrYr)) {
+        share$vars$NetNMin <- NetNMin
+        share$vars$NetNMinYr <- NetNMinYr
+        share$vars$NetNitrYr <- NetNitrYr
+    }
+
 }

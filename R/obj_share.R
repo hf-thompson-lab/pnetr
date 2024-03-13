@@ -183,6 +183,7 @@ ShareVars <- R6::R6Class("ShareVars",
             AgHarv = 0,
 
             FolN = 0,
+            FolNConOld = 0,
             FolC = 0,
             TotalN = 0,
             TotalM = 0,
@@ -260,41 +261,44 @@ ShareVars <- R6::R6Class("ShareVars",
             self$vars$WoodC <- 300
             self$vars$Water <- 12
             self$vars$DWater <- 1
-            self$vars$NRatio <- 1.3993
-            self$vars$NRatioNit <- 1
-            self$vars$PlantN <- 1
             self$vars$WoodMass <- 20000
             self$vars$RootMass <- 6
-            self$vars$HOM <- 13500
-            self$vars$HON <- 390
             self$vars$RootNSinkEff <- .5
             self$vars$WUEO3Eff <- 0
-            self$vars$NetNMinLastYr <- 10
             self$vars$LightEffMin <- 1
             
             self$vars$RootC <- self$vars$WoodC / 3
-            self$vars$WoodMassN <- self$vars$WoodMass * vegpar$WLPctN * 
-                self$vars$NRatio
-            self$vars$DeadWoodN <- self$vars$DeadWoodM * vegpar$WLPctN * 
-                self$vars$NRatio
 
             # ~ For PnET-CN
-            self$glb$O3Effect <- 50
+            self$glb$O3Effect <- numeric(50)
             self$glb$NetNMinLastYr <- 10
+            self$vars$NetNMinLastYr <- 10
+            
+            self$vars$PlantN <- 1
+            self$vars$NRatio <- 1.3993
+            self$vars$NRatioNit <- 1
+            self$vars$HOM <- 13500
+            self$vars$HON <- 390
 
+            self$vars$WoodMassN <- self$vars$WoodMass * vegpar$WLPctN *
+                self$vars$NRatio
+            self$vars$DeadWoodN <- self$vars$DeadWoodM * vegpar$WLPctN *
+                self$vars$NRatio
         },
 
         # Log intermitent variable values for the current time step
-        logvars = function(i) {
-            varnames <- names(self$vars)
-            # The following variables are calculated at one go so do not need to
-            # be updated each time
-            varnames <- varnames[! varnames %in% c(
-                "Tavg", "Tday", "Tnight", "Tmin", "VPD", 
-                "Month", "Dayspan", "Daylenhr", "Daylen", "Nightlen", 
-                "GDD", "GDDTot",
-                "DayResp", "NightResp", "DTemp", "DVPD"
-            )]
+        logvars = function(i, varnames = NULL) {
+            if (is.null(varnames)) {
+                varnames <- names(self$vars)
+                # The following variables are calculated at one go so do not need to
+                # be updated each time
+                varnames <- varnames[!varnames %in% c(
+                    "Tavg", "Tday", "Tnight", "Tmin", "VPD",
+                    "Month", "Dayspan", "Daylenhr", "Daylen", "Nightlen",
+                    "GDD", "GDDTot",
+                    "DayResp", "NightResp", "DTemp", "DVPD"
+                )]
+            }
 
             vals <- lapply(varnames, function(v) { self$vars[[v]] })
             set(self$logdt, as.integer(i), varnames, vals)
@@ -349,14 +353,15 @@ ShareVars <- R6::R6Class("ShareVars",
                 NPPFolYr, NPPWoodYr, NPPRootYr, NEP, TotGrossPsn,
                 # Water
                 DWater, TotWater, TotTrans, TotPsn, TotDrain, TotPrec, TotEvap, 
-                ET,
+                TotET = TotTrans + TotEvap,
                 # Carbon cycle
                 PlantC, BudC, WoodC, RootC,
                 FolMass, DeadWoodM, WoodMass, RootMass,
                 HOM, HON,
                 # Nitrogen cycle
                 PlantN, BudN, NDrainYr, NetNMinYr, GrossNMinYr, PlantNUptakeYr,
-                GrossNImmobYr, TotalLitterNYr, NetNitrYr, NRatio, FolN, 
+                GrossNImmobYr, TotalLitterNYr, NetNitrYr, NRatio, 
+                FolN = FolNConOld, NdepTot, 
                 # TBCA
                 TotalLitterMYr, RootMRespYr, RootGRespYr, SoilDecRespYr
             )]

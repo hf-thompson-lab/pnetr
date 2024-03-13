@@ -55,7 +55,7 @@ PnET_II <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
 
     # Now, for each time step
     for (rstep in 1L:length(share$logdt$DOY)) {
-        if (share$logdt[rstep, Month] == 1) {
+        if (rstep > 1 && share$logdt[rstep, Month] == 1) {
             YearInit(share)
         }
         # Assign already calculated values

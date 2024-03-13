@@ -79,6 +79,10 @@ CalCO2effectConductance <- function(Ca, DelAmax, CiElev, Ci350, sitepar) {
 #' - PosCBalMassTot
 #' - PosCBalMassIx
 #' - LightEffMin
+#' ---- For PnET-CN
+#' - DelAmax
+#' - DWUE
+#' - CanopyDO3Pot
 #' 
 #' @param climate_dt A table that contains monthly climate data.
 #' @param sitepar A table that contains site-specific variables.
@@ -94,6 +98,11 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
     LightEffMin <- NULL
     LAI <- NULL
     DayResp <- NightResp <- NULL
+    # For PnET-CN
+    if (model == "pnet-cn") {
+        DelAmax <- DWUE <- NULL
+        CanopyDO3Pot <- NULL
+    }
 
 
     # No leaves, no photosynthesis
@@ -103,8 +112,10 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         DOY <- share$logdt[rstep, DOY]
         DTemp <- share$logdt[rstep, DTemp]
         Tday <- share$logdt[rstep, Tday]
+        Tnight <- share$logdt[rstep, Tnight]
         DVPD <- share$logdt[rstep, DVPD]
         Daylen <- share$logdt[rstep, Daylen]
+        Nightlen <- share$logdt[rstep, Nightlen]
         Dayspan <- share$logdt[rstep, Dayspan]
         DayResp <- share$logdt[rstep, DayResp]
         NightResp <- share$logdt[rstep, NightResp]
@@ -118,10 +129,20 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         if (model == "pnet-cn") {
             CO2Psn <- CalCO2effectPsn(climate_dt$CO2[rstep], vegpar)
 
-            share$Amax <- vegpar$AmaxA + vegpar$AmaxB * vegpar$FolNCon *
+            share$glb$Amax <- vegpar$AmaxA + vegpar$AmaxB * vegpar$FolNCon *
                 CO2Psn$DelAmax
-            share$Amax_d <- share$Amax * vegpar$AmaxFrac
-            share$BaseFolResp <- share$Amax * vegpar$BaseFolRespFrac
+            share$glb$Amax_d <- share$glb$Amax * vegpar$AmaxFrac
+            share$glb$BaseFolResp <- share$glb$Amax * vegpar$BaseFolRespFrac
+
+            # Recalculate day and night respiration
+            DayResp <- CalRealizedResp(
+                share$glb$BaseFolResp, vegpar$RespQ10,
+                Tday, vegpar$PsnTOpt, Daylen
+            )
+            NightResp <- CalRealizedResp(
+                share$glb$BaseFolResp, vegpar$RespQ10,
+                Tnight, vegpar$PsnTOpt, Nightlen
+            )
 
             CO2Cond <- CalCO2effectConductance(
                 climate_dt$CO2[rstep],
@@ -129,11 +150,13 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
                 sitepar
             )
 
-            currow$DelAmax <- CO2Psn$DelAmax
-            currow$DWUE <- CO2Cond$DWUE
+            DelAmax <- CO2Psn$DelAmax
+            DWUE <- CO2Cond$DWUE
 
             # Calculate canopy ozone extinction based on folmass
             O3Prof <- 0.6163 + (0.00105 * share$vars$FolMass)
+
+            # Init some values
             CanopyNetPsnO3 <- 0
         }
 
@@ -274,5 +297,20 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
     }
     if (!is.null(LightEffMin) && share$vars$LightEffMin > LightEff) {
         share$vars$LightEffMin <- LightEffMin
+    }
+    # For PnET-CN -----------------
+    if (model == "pnet-cn") {
+        if (!is.null(DelAmax)) {
+            share$vars$DelAmax <- DelAmax
+        }
+        if (!is.null(DWUE)) {
+            share$vars$DWUE <- DWUE
+        }
+        if (!is.null(CanopyDO3Pot)) {
+            share$vars$CanopyDO3Pot <- CanopyDO3Pot
+        }
+        # Here we have to update the log table
+        set(share$logdt, rstep, "DayResp", DayResp)
+        set(share$logdt, rstep, "NightResp", NightResp)
     }
 }

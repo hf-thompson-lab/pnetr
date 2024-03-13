@@ -28,6 +28,7 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
     # Variables to update
     GDDFolEff <- FolMass <- FolProdCMo <- FolGRespMo <- NULL
     LAI <- NULL
+    FolLitM <- NULL
 
     GDDTot <- share$logdt[rstep, GDDTot]
     DOY <- share$logdt[rstep, DOY]
@@ -51,6 +52,7 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
             FolGRespMo <- 0
         }
     } else if (phenophase == "senesce") {
+        FolLitM <- 0
         if (share$vars$PosCBalMass < share$vars$FolMass && 
             DOY > vegpar$SenescStart
         ) {
@@ -65,7 +67,7 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
 
             # Calculate litter mass
             if (FolMassNew < share$vars$FolMass) {
-                share$vars$FolLitM <- share$vars$FolMass - FolMassNew
+                FolLitM <- share$vars$FolMass - FolMassNew
             }
 
             FolMass <- FolMassNew
@@ -99,5 +101,8 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
     }
     if (!is.null(LAI)) {
         share$vars$LAI <- LAI
+    }
+    if (!is.null(FolLitM)) {
+        share$vars$FolLitM <- FolLitM
     }
 }

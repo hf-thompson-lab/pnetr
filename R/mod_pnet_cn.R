@@ -25,16 +25,27 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     share <- ShareVars$new(climate_dt, vegpar)
 
     # These parameters can be calculated at once, can save some computing time
-    AtmEnviron(climate_dt, sitepar$Lat, share$dt)
+    AtmEnviron(climate_dt, sitepar$Lat, share$logdt)
+
+    # Realized daytime respiration
+    share$logdt[, DayResp := CalRealizedResp(
+        share$glb$BaseFolResp, vegpar$RespQ10,
+        share$logdt$Tday, vegpar$PsnTOpt, share$logdt$Daylen
+    )]
+    # Realized nighttime respiration
+    share$logdt[, NightResp := CalRealizedResp(
+        share$glb$BaseFolResp, vegpar$RespQ10, share$logdt$Tnight,
+        vegpar$PsnTOpt, share$logdt$Nightlen
+    )]
 
     # Calculate temperature effect
-    share$dt[, DTemp := CalDTemp(
+    share$logdt[, DTemp := CalDTemp(
         Tday, Tmin, vegpar$PsnTOpt, vegpar$PsnTMin,
         GDDTot, vegpar$GDDFolEnd, Dayspan
     )]
 
     # Calculate DVPD effect
-    share$dt[, DVPD := 1 - vegpar$DVPD1 * share$dt$VPD^vegpar$DVPD2]
+    share$logdt[, DVPD := 1 - vegpar$DVPD1 * share$logdt$VPD^vegpar$DVPD2]
 
     # Create a progress bar
     if (verbose == TRUE) {
@@ -42,69 +53,54 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     }
 
     # Now, for each time step
-    for (rstep in 1L:length(share$dt$DOY)) {
+    for (rstep in 1L:length(share$logdt$DOY)) {
+if (rstep == 25) {
+    b <- 1
+}
 
-        if (rstep > 1) {
-            set(share$dt, rstep, "BudC", share$dt[rstep - 1, BudC])
-            set(share$dt, rstep, "RootC", share$dt[rstep - 1, RootC])
-            set(share$dt, rstep, "WoodC", share$dt[rstep - 1, WoodC])
-            set(share$dt, rstep, "PlantC", share$dt[rstep - 1, PlantC])
+        if (rstep > 1 && share$logdt[rstep, Month] == 1) {
+            AllocateYr(sitepar, vegpar, share, rstep, model = "pnet-cn")
+            
+            # ============== maybe detele later =================
+            # Just to make it consistent w/ Matlab version
+            # But, I don't think they are needed once we confirm all processes
+            # in the model are coded correctly.
+
+            varnames <- names(share$vars)
+            varnames <- varnames[!varnames %in% c(
+                "Tavg", "Tday", "Tnight", "Tmin", "VPD",
+                "Month", "Dayspan", "Daylenhr", "Daylen", "Nightlen",
+                "GDD", "GDDTot",
+                "DayResp", "NightResp", "DTemp", "DVPD",
+                "PlantN", "FolN"
+            )]
+            share$logvars(rstep - 1, varnames)
+            # ============== maybe detele later =================
+
+            YearInit(share)
         }
+        # Assign already calculated values
+        share$vars$GDD <- share$logdt[rstep, GDD]
+        share$vars$GDDTot <- share$logdt[rstep, GDDTot]
+        share$vars$DayResp <- share$logdt[rstep, DayResp]
+        share$vars$NightResp <- share$logdt[rstep, NightResp]
 
-        if (rstep == 40) {
-            bb <- 1
-        }
-
-        # End of year activity
-        if (rstep != 1 && share$dt$DOY[rstep] < share$dt$DOY[rstep - 1]) {
-            set(share$dt, rstep, names(share$dt), AllocateYrPre(
-                sitepar, vegpar, share, rstep, model = "pnet-cn"
-            ))
-        }
-
-        set(share$dt, rstep, names(share$dt), Phenology(
-            sitepar, vegpar, share, rstep,
-            phenophase = "grow"
-        ))
-
-        set(share$dt, rstep, names(share$dt), Photosynthesis(
-            climate_dt, sitepar, vegpar, share, rstep, model = "pnet-cn"
-        ))
-        set(share$dt, rstep, names(share$dt), Waterbal(
-            climate_dt, sitepar, vegpar, share, rstep, model = "pnet-cn"
-        ))
-
-        set(share$dt, rstep, names(share$dt), AllocateMon(
-            sitepar, vegpar, share, rstep, model = "pnet-cn"
-        ))
-
-        set(share$dt, rstep, names(share$dt), Phenology(
-            sitepar, vegpar, share, rstep,
-            phenophase = "senesce"
-        ))
+        Phenology(sitepar, vegpar, share, rstep, phenophase = "grow")
+        Photosynthesis(climate_dt, sitepar, vegpar, share, rstep, model = "pnet-cn")
+        Waterbal(climate_dt, sitepar, vegpar, share, rstep, model = "pnet-cn")
+        AllocateMon(sitepar, vegpar, share, rstep, model = "pnet-cn")
+        Phenology(sitepar, vegpar, share, rstep, phenophase = "senesce")
 
         # PnET-CN specific
-        set(share$dt, rstep, names(share$dt), CNTrans(
-            climate_dt, sitepar, vegpar, share, rstep
-        ))
+        CNTrans(climate_dt, sitepar, vegpar, share, rstep)
+        Decomp(climate_dt, sitepar, vegpar, share, rstep)
+        Leach(share, rstep)
 
-        set(share$dt, rstep, names(share$dt), Decomp(
-            climate_dt, sitepar, vegpar, share, rstep
-        ))
-        set(share$dt, rstep, names(share$dt), Leach(
-            share, rstep
-        ))
-
-        # # End of year activity
-        # if (share$dt[rstep, Month] == 12) {
-        #     set(share$dt, rstep, names(share$dt), AllocateYr(
-        #         sitepar, vegpar, share, rstep, model = "pnet-cn"
-        #     ))
-        # }
+        share$logvars(rstep)
 
         if (verbose == TRUE) {
             # update progress
-            setTxtProgressBar(pb, rstep * 100 / length(share$dt$DOY))
+            setTxtProgressBar(pb, rstep * 100 / length(share$logdt$DOY))
         }
     }
 
