@@ -25,52 +25,84 @@
 #' @param rstep current time step
 #' @param phenophase Phenology stage, can be "grow" or "senesce".
 Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
-    # Current time step
-    currow <- share$dt[rstep,]
-    # Previous time step
-    prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+    # Variables to update
+    GDDFolEff <- FolMass <- FolProdCMo <- FolGRespMo <- NULL
+    LAI <- NULL
+    FolLitM <- NULL
+
+    GDDTot <- share$logdt[rstep, GDDTot]
+    DOY <- share$logdt[rstep, DOY]
 
     if (phenophase == "grow") {
         # Within growing season but before senescence
-        if (currow$GDDTot > vegpar$GDDFolStart && 
-            currow$DOY < vegpar$SenescStart
-        ) {
+        if (GDDTot > vegpar$GDDFolStart && DOY < vegpar$SenescStart) {
             # GDD effect on foliage
-            currow$GDDFolEff <- (currow$GDDTot - vegpar$GDDFolStart) / 
+            GDDFolEff <- (GDDTot - vegpar$GDDFolStart) / 
                 (vegpar$GDDFolEnd - vegpar$GDDFolStart)
-            currow$GDDFolEff <- max(0, min(1, currow$GDDFolEff))
+            GDDFolEff <- max(0, min(1, GDDFolEff))
 
-            delGDDFolEff <- currow$GDDFolEff - prerow$GDDFolEff
-            currow$FolMass <- prerow$FolMass + 
-                (prerow$BudC * delGDDFolEff) / vegpar$CFracBiomass
+            delGDDFolEff <- GDDFolEff - share$vars$GDDFolEff
+            FolMass <- share$vars$FolMass + 
+                (share$vars$BudC * delGDDFolEff) / vegpar$CFracBiomass
             
-            currow$FolProdCMo <- (currow$FolMass - prerow$FolMass) * 
-                vegpar$CFracBiomass
-            currow$FolGRespMo <- currow$FolProdCMo * vegpar$GRespFrac
+            FolProdCMo <- (FolMass - share$vars$FolMass) * vegpar$CFracBiomass
+            FolGRespMo <- FolProdCMo * vegpar$GRespFrac
         } else {
-            currow$FolMass <- prerow$FolMass
+            FolProdCMo <- 0
+            FolGRespMo <- 0
         }
     } else if (phenophase == "senesce") {
-        if (currow$PosCBalMass < currow$FolMass && 
-            currow$DOY > vegpar$SenescStart
+        FolLitM <- 0
+        if (share$vars$PosCBalMass < share$vars$FolMass && 
+            DOY > vegpar$SenescStart
         ) {
-            FolMassNew <- max(currow$PosCBalMass, vegpar$FolMassMin)
+            FolMassNew <- max(share$vars$PosCBalMass, vegpar$FolMassMin)
+            
+            # Calculate LAI
             if (FolMassNew == 0) {
-                currow$LAI <- 0
-            } else if (FolMassNew < currow$FolMass) {
-                currow$LAI <- currow$LAI * (FolMassNew / currow$FolMass)
+                LAI <- 0
+            } else if (FolMassNew < share$vars$FolMass) {
+                LAI <- share$vars$LAI * (FolMassNew / share$vars$FolMass)
             }
 
-            if (FolMassNew < currow$FolMass) {
-                currow$FolLitM <- currow$FolMass - FolMassNew
+            # Calculate litter mass
+            if (FolMassNew < share$vars$FolMass) {
+                FolLitM <- share$vars$FolMass - FolMassNew
             }
 
-            # Update current foliar mass
-            currow$FolMass <- FolMassNew
+            FolMass <- FolMassNew
         }
+
     } else {
         stop("Phenophase does not exist!")
     }
 
-    return(currow)
+
+    # Update values
+    if (!is.null(GDDTot)) {
+        share$vars$GDDTot <- GDDTot
+    }
+    if (!is.null(DOY)) {
+        share$vars$DOY <- DOY
+    }
+    
+    if (!is.null(GDDFolEff)) {
+        share$vars$GDDFolEff <- GDDFolEff
+    }
+    
+    if (!is.null(FolMass)) {
+        share$vars$FolMass <- FolMass
+    }
+    if (!is.null(FolProdCMo)) {
+        share$vars$FolProdCMo <- FolProdCMo
+    }
+    if (!is.null(FolGRespMo)) {
+        share$vars$FolGRespMo <- FolGRespMo
+    }
+    if (!is.null(LAI)) {
+        share$vars$LAI <- LAI
+    }
+    if (!is.null(FolLitM)) {
+        share$vars$FolLitM <- FolLitM
+    }
 }

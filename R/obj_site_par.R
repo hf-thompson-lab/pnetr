@@ -7,7 +7,7 @@
 
 
 # These default values are from Aber et al 1992, 1995, 1996
-SitePar <- R6::R6Class("sitepar", inherit = Param,
+SitePar <- R6::R6Class("SitePar", inherit = Param,
 
     public = list(
         # Latitude (degrees)
