@@ -18,24 +18,25 @@
 #' @param rstep current time step
 #' @param phenophase Phenology stage, can be "grow" or "senesce".
 SoilRespiration <- function(sitepar, vegpar, share, rstep) {
-    # Current time step
-    currow <- share$dt[rstep, ]
-    # Previous time step
-    prerow <- if (rstep == 1) currow else share$dt[rstep - 1, ]
+    # Variables to update
+    SoilRespMo <- SoilRespYr <- NULL
 
+    # Some already caculated variables at this time step
+    Tavg <- share$logdt[rstep, Tavg]
+    Dayspan <- share$logdt[rstep, Dayspan]
+    
     # TODO: Why divide by 30.5?
-    soil_resp <- vegpar$SoilRespA * exp(vegpar$SoilRespB * currow$Tavg) * 
-        currow$MeanSoilMoistEff * (currow$Dayspan / 30.5)
+    SoilRespMo <- vegpar$SoilRespA * exp(vegpar$SoilRespB * Tavg) * 
+        share$vars$MeanSoilMoistEff * (Dayspan / 30.5)
 
     # currow$SoilRespMo <- vegpar$SoilRespA * exp(vegpar$SoilRespB * currow$Tavg)
     # currow$SoilRespMo <- currow$SoilRespMo * currow$MeanSoilMoistEff
     # currow$SoilRespMo <- currow$SoilRespMo * (currow$Dayspan / 30.5)
     
-    currow$SoilRespMo <- soil_resp
-    currow$SoilRespYr <- ifelse(currow$Year == prerow$Year, 
-        prerow$SoilRespYr + soil_resp,
-        currow$SoilRespYr + soil_resp
-    )
+    SoilRespYr <- share$vars$SoilRespYr + SoilRespMo
 
-    return(currow)
+
+    # Update variables
+    share$vars$SoilRespMo <- SoilRespMo
+    share$vars$SoilRespYr <- SoilRespYr
 }
