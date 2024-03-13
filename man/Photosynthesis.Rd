@@ -28,6 +28,10 @@ The following variables are calculated/updated:
 \item CanopyGrossPsn
 \item PosCBalMassTot
 \item PosCBalMassIx
-\item LightEffMin (in Share)
+\item LightEffMin
+---- For PnET-CN
+\item DelAmax
+\item DWUE
+\item CanopyDO3Pot
 }
 }

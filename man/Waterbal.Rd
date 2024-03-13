@@ -23,8 +23,8 @@ The following variables are calculated/updated:
 \item SnowPack (in SitePar)
 \item Water
 \item DWater
-\item Dwatertot
-\item DwaterIx
+\item DWatertot
+\item DWaterIx
 \item MeanSoilMoistEff
 \item CanopyGrossPsnActMo
 \item GrsPsnMo
@@ -37,5 +37,7 @@ The following variables are calculated/updated:
 \item TotEvap
 \item TotGrossPsn
 \item ET
+---- For PnET-CN
+\item CanopyDO3Pot
 }
 }

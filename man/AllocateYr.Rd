@@ -20,7 +20,6 @@ The following variables are calculated/updated:
 \itemize{
 \item BudC
 \item WoodC
-\item RootC
 \item PlantC
 \item NPPFolYr
 \item NPPWoodYr
@@ -30,12 +29,8 @@ The following variables are calculated/updated:
 \item NEP
 --- For PnET-CN only ---
 \itemize{
-\item WoodMass
-\item WoodMassN
-\item RootMass
-\item RootMassN
-\item FolNCon (in VegPar)
 \item PlantN
+\item FolNCon (in VegPar)
 \item NH4
 \item NRatio
 \item RootNSinkEff
