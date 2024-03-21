@@ -59,10 +59,14 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
             FolMassNew <- max(share$vars$PosCBalMass, vegpar$FolMassMin)
             
             # Calculate LAI
-            if (FolMassNew == 0) {
-                LAI <- 0
-            } else if (FolMassNew < share$vars$FolMass) {
-                LAI <- share$vars$LAI * (FolMassNew / share$vars$FolMass)
+            # if (FolMassNew == 0) {
+            #     LAI <- 0
+            # } else if (FolMassNew < share$vars$FolMass) {
+            #     LAI <- share$vars$LAI * (FolMassNew / share$vars$FolMass)
+            # }
+            LAI <- share$vars$LAI * (FolMassNew / share$vars$FolMass)
+            if (FolMassNew > share$vars$FolMass) {
+                stop("should not be here!")
             }
 
             # Calculate litter mass

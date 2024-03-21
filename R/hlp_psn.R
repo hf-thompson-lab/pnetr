@@ -29,7 +29,7 @@ CalDTemp <- function(Tday, Tmin, PsnTOpt, PsnTMin, GDDTot, GDDFolEnd, Dayspan) {
 # CO2 effect on photosynthesis. Introduced in PnET-CN
 CalCO2effectPsn <- function(Ca, vegpar) {
     # Leaf internal/external CO2
-    CiCaRatio <- (-0.075 * vegpar$FolNCon) + 0.875
+    CiCaRatio <- -0.075 * vegpar$FolNCon + 0.875
     # Ci at present (350 ppm) CO2
     Ci350 <- 350 * CiCaRatio
     # Ci at RealYear CO2 level
@@ -169,7 +169,6 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         # Calculate photosynthsis by simulating canopy layers -----------------
 
         # Number of layers to simulate
-        Layer <- 0
         nlayers <- vegpar$IMAX
         # Average leaf mass per layer
         avgMass <- share$vars$FolMass / nlayers
@@ -187,7 +186,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
 
             # Gross layer psn w/o water stress
             LayerGrossPsnRate <- GrossAmax * LightEff
-            LayerGrossPsn <- LayerGrossPsnRate * (avgMass)
+            LayerGrossPsn <- LayerGrossPsnRate * avgMass
 
             # Net layer psn w/o water stress
             LayerResp <- (DayResp + NightResp) * avgMass
@@ -204,15 +203,14 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
                     # Convert netpsn to micromoles for calculating conductance
                     netPsnumol <- ((LayerNetPsn * 10^6) /
                         (Daylen * 12)) /
-                        ((share$vars$FolMass / 50) / SLWLayer)
+                        (avgMass / SLWLayer)
                     # Calculate ozone extinction throughout the canopy
-                    Layer <- Layer + 1
-                    RelLayer <- Layer / 50
+                    RelLayer <- ix / nlayers
                     RelO3 <- 1 - (RelLayer * O3Prof)^3
                     # % Calculate Conductance (mm/s): Conductance down-regulates
                     # with prior O3 effects on Psn
                     LayerG <- (CO2Cond$gsInt + (CO2Cond$gsSlope * netPsnumol)) *
-                        (1 - share$glb$O3Effect[Layer])
+                        (1 - share$glb$O3Effect[ix])
                     # For no downregulation use:
                     # LayerG = gsInt + (gsSlope * netPsnumol);
                     if (LayerG < 0) {
@@ -222,12 +220,12 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
                     # Calculate cumulative ozone effect for each canopy layer
                     # with consideration that previous O3 effects were modified
                     # by drought
-                    share$glb$O3Effect[Layer] <- min(
+                    share$glb$O3Effect[ix] <- min(
                         1,
-                        (share$glb$O3Effect[Layer] * share$vars$DroughtO3Frac) +
+                        (share$glb$O3Effect[ix] * share$vars$DroughtO3Frac) +
                             (0.0026 * LayerG * climate_dt$O3[rstep] * RelO3)
                     )
-                    LayerDO3 = 1 - share$glb$O3Effect[Layer]
+                    LayerDO3 = 1 - share$glb$O3Effect[ix]
                 } else {
                     LayerDO3 = 1
                 }
