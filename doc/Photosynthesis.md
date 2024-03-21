@@ -1,22 +1,35 @@
 # Photosynthesis
 
-Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
+This routine estimates photosynthesis **without water stress**. Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
 
-- DTemp
-- GrossAmax
-- PosCBalMass
-- LAI
-- CanopyNetPsn
-- CanopyGrossPsn
-- PosCBalMassTot
-- PosCBalMassIx
-- LightEffMin
+- $\text{DTemp}$: Temperature effect on photosynthesis.
+- $\text{GrossAmax}$: Realized gross photosynthetic rate.
+- $\text{LAI}$: Leaf area index.
+- $\text{CanopyNetPsn}$: Canopy-level net photosynthesis.
+- $\text{CanopyGrossPsn}$: Canopy-level gross photosynthesis.
+- $\text{PosCBalMass}$: 
+- $\text{PosCBalMassTot}$: 
+- $\text{PosCBalMassIx}$:
+- $\text{LightEffMin}$: Minimum light effect on photosynthesis.
+
+And, for PnET-CN, these variables are also involved:
+
+- $\text{DelAmax}$
+- $\text{DWUE}$
+- $\text{CanopyDO3Pot}$
+
 
 ## Calculate the realized gross photosynthetic rate
 
-Considering seasonality, if foliar biomass $\text{FolMass}^m \leq 0$, there will not be photosynthesis and the following variables will be simply assigned 0: $\text{PosCBalMass}$, $\text{CanopyNetPsn}$, $\text{CanopyGrossPsn}$, $\text{LAI}$, $\text{DayResp}$, $\text{NightResp}$.
+Considering seasonality, if foliar biomass $\text{FolMass}^t \leq 0$, there will not be photosynthesis and the following variables will be simply assigned 0: 
+- $\text{PosCBalMass} = 0$
+- $\text{CanopyNetPsn} = 0$
+- $\text{CanopyGrossPsn} = 0$
+- $\text{LAI} = 0$
+- $\text{DayResp} = 0$
+- $\text{NightResp} = 0$.
 
-Otherwise, the realized gross photosynthetic rate ($\text{GrossAmax}$) is calculated by the potential photosynthesis under the effects of light ($\text{LightEff}$), temperature ($\text{DTemp}$), VPD (${\text{DVPD}}$), and water stress ($\text{DWater}$):
+Otherwise, the realized gross photosynthetic rate ($\text{GrossAmax}$) is calculated by the potential photosynthesis ($\text{PotGrossAmax}$) under the effects of light ($\text{LightEff}$), temperature ($\text{DTemp}$), VPD (${\text{DVPD}}$), and water stress ($\text{DWater}$):
 
 $$\text{GrossAmax} = \text{PotGrossAmax} \cdot \text{LightEff} \cdot \text{DTemp} \cdot \text{DVPD} \cdot \text{DWater}$$
 
@@ -28,6 +41,19 @@ $\text{PotGrossAmax}$ is determined by the instantaneous max net photosynthesis 
 
 $$\text{Amax} = \textcolor{cyan}{\text{AmaxA}} + \textcolor{cyan}{\text{AmaxB}} \cdot \textcolor{cyan}{\text{FolNCon}}$$
 
+However, for PnET-CN, we need to add CO2 effect on photosynthesis to the above equation:
+
+$$\text{Amax} = \textcolor{cyan}{\text{AmaxA}} + \textcolor{cyan}{\text{AmaxB}} \cdot \textcolor{cyan}{\text{FolNCon}} \cdot \text{DelAmax}$$
+
+<!-- #HACK: understand this! -->
+where $\text{DelAmax}$ is determined by the CO2 concentration and the foliar nitrogen concentration ($\text{FolNCon}$):
+
+$$\text{DelAmax} = 1 + \frac{\text{Arel}_{Elev} - \text{Arel}_{350}}{\text{Arel}_{350}}$$
+$$\text{Arel} = 1.22 + \frac{C_i - 68}{C_i + 136}$$
+$$C_i = C_a \cdot \text{CiCaRatio}$$
+$$\text{CiCaRatio} = -0.075 \cdot \text{FolNCon} + 0.0875$$
+$$\text{Arel}_{350} = \text{Arel}(C_i = 350) = \text{Arel}(C_i(C_a = 350))$$
+
 Daily averaged instantaneous max net photosynthesis rate ($\text{Amax}^d$) is then calculated as a fraction ($\textcolor{cyan}{\text{AmaxFrac}}$) of the $\text{Amax}$, reflecting the fact that $\text{Amax}$ is not maintained throughout an entire day due to light limitation, increased evaporative demand, etc.:
 
 $$\text{Amax}^d = \text{Amax} \cdot \textcolor{cyan}{\text{AmaxFrac}}$$
@@ -36,13 +62,16 @@ A basal respiration rate at 20 °C ($\text{BaseFolResp}$) is calculated as a fra
 
 $$\text{BaseFolResp} = \textcolor{cyan}{\text{BaseFolRespFrac}} \cdot \text{Amax}$$
 
-Then, the realized daytime and nighttime respirations are calculated using a $Q_{10}$ factor specified by $\textcolor{cyan}{\text{RespQ10}}$.
+Then, the realized daytime and nighttime respirations are calculated using a $Q_{10}$ factor specified by $\textcolor{cyan}{\text{RespQ10}}$:
 
-$$\text{DayResp}^m = (\text{BaseFolResp} \cdot \textcolor{cyan}{\text{RespQ10}}^{(\text{T}_{day}^m - \textcolor{cyan}{\text{PsnTopt}}) / 10} \cdot \text{Daylength}^m \cdot 12) / 10^9$$
+$$\begin{align*}
+\text{Resp} &= f_{Resp}(\text{BaseFolResp}, \text{T}, \text{Time}) \\ &= (\text{BaseFolResp} \cdot \textcolor{cyan}{\text{RespQ10}}^{(\text{T} - \textcolor{cyan}{\text{PsnTopt}}) / 10} \cdot \text{Time} \cdot 12) / 10^9
+\end{align*}$$
 
-$$\text{NightResp}^m = (\text{BaseFolResp} \cdot \textcolor{cyan}{\text{RespQ10}}^{(\text{T}_{night}^m - \textcolor{cyan}{\text{PsnTopt}}) / 10} \cdot \text{Nightlength}^m \cdot 12) / 10^9$$
+$$\text{DayResp} = f_{Resp}(\text{BaseFolResp}, \text{T}_{day}, \text{Daylength})$$
+$$\text{NightResp} = f_{Resp}(\text{BaseFolResp}, \text{T}_{night}, \text{Nightlength})$$
 
-Note that the above variables ($\text{Amax}$, $\text{Amax}^d$, $\text{BaseFolResp}$, $\text{DayResp}^m$, $\text{NightResp}^m$) can be calculated once and they don't change throughout the entire simulation.
+> Note that for PnET-Day and PnET-II, the above variables ($\text{Amax}$, $\text{Amax}^d$, $\text{BaseFolResp}$, $\text{DayResp}$, $\text{NightResp}$) can be calculated once and they don't change throughout the entire simulation. For PnET-CN, because $\text{FolNCon}$ changes year to year, those variables cannot be calculated at one go.
 
 Then, $\text{PotGrossAmax}$ can be calculated by adding $\text{Amax}^{d}$ and $\text{BaseFolResp}$:
 
@@ -50,53 +79,52 @@ $$\text{PotGrossAmax} = \text{Amax}^d + \text{BaseFolResp}$$
 
 ### Temperature effect on photosynthesis ($\text{DTemp}$)
 
-Response functions for radiation intensity, temperature, and vapor pressure deficit (VPD) are used with daily mean climate drivers to calculate the realized $A_{\max}$ for leaves at the top of the canopy. Then, a layered canopy is simulated with both radiation intensity and specific leaf weight ($\text{SLW}$) declining with canopy depth. Daytime and nighttime leaf respiration ($\text{DayResp}, \text{NightResp}$) is a function of $A_{\max}$ and temperature. Maximum (summer) and minimum (winter) leaf mass are input parameters. (Aber et al 1992, Eq. 6. Slightly different)
+Daytime and nighttime leaf respiration ($\text{DayResp}, \text{NightResp}$) is a function of $A_{\max}$ and temperature. Maximum (summer) and minimum (winter) leaf mass are input parameters. (Aber et al 1992, Eq. 6. Slightly different)
 
-$${\text{DTemp}}^m = \frac{(\textcolor{cyan}{\text{Psn}T_\text{max}} - T_{\text{day}}^m) \cdot (T_{\text{day}}^m - \textcolor{cyan}{\text{Psn}T_\text{min}})}{((\textcolor{cyan}{\text{Psn}T_\text{max}} - \textcolor{cyan}{\text{Psn}T_\text{min}}) / 2)^2}$$
+$${\text{DTemp}} = \frac{(\textcolor{cyan}{\text{Psn}T_\text{max}} - T_{\text{day}}) \cdot (T_{\text{day}} - \textcolor{cyan}{\text{Psn}T_\text{min}})}{((\textcolor{cyan}{\text{Psn}T_\text{max}} - \textcolor{cyan}{\text{Psn}T_\text{min}}) / 2)^2}$$
 
-If $T_{min}^m < 6$ & $\text{DTemp}^m > 0$ & $\text{GDD}_{\text{total}}^m \geq \textcolor{cyan}{\text{GDDFolEnd}^{sp}}$:
+<!-- #HACK: what does this mean? -->
+However, if $\text{T}_{min}^t < 6$ & $\text{DTemp}^t > 0$ & $\text{GDDTot}^t \geq \textcolor{cyan}{\text{GDDFolEnd}}$:
 
-$$\text{DTemp}^m = \text{DTemp}^m \cdot (1 - \frac{6 - T_{min}^m}{6}) \cdot (\text{Dayspan}^m / 30)$$
+$$\text{DTemp} = \text{DTemp} \cdot (1 - \frac{6 - \text{T}_{min}}{6})$$
 
-End
-
-$$\text{DTemp}^m = \max(\text{DTemp}^m, 0)$$
+Note that $\text{DTemp} \ge 0$.
 
 ### VPD effect on photosynthesis (${\text{DVPD}}$)
 
-$${\text{DVPD}}^m = 1 - \textcolor{cyan}{\text{DVPD1}} \cdot ({\text{VPD}^m}) ^{\textcolor{cyan}{\text{DVPD2}}}$$
+The VPD effect on photosynthesis is determined by an empirical function with 2 parameters ($\text{DVPD1}$ and $\text{DVPD2}$):
+
+$${\text{DVPD}} = 1 - \textcolor{cyan}{\text{DVPD1}} \cdot ({\text{VPD}}) ^{\textcolor{cyan}{\text{DVPD2}}}$$
 
 ### Simulate canopy layers
 
-Since a canopy is a vertical structure, light conditions are different at different canopy layers. To calculate the accumulated variables, we simulate the canopy to have `nlayer` of layers (`nlayer = 50` by default). For each layer `i`, we estimate a $\text{LightEff}_i$ and use it to calculate a realized layer-level gross photosynthesis ($\text{LayerGrossPsn}$) and net photosynthesis ($\text{LayerNetPsn}$). Specifically, $\text{LayerGrossAmax}$ without water stress is calculated by:
+The above response functions for temperature and vapor pressure deficit (VPD) are for calculating the realized $A_{\max}$ for leaves at the top of the canopy, but the canopy is a vertical structure and light conditions are different at different canopy layers. We can simulate the layered canopy with both radiation intensity and specific leaf weight ($\text{SLW}$) declining with canopy depth. To calculate the accumulated variables, we simulate the canopy to have `nlayer` of layers (`nlayer = 50` by default). For each layer `i`, we estimate a $\text{LightEff}_i$ and use it to calculate a realized layer-level gross photosynthesis ($\text{LayerGrossPsn}_i$) and net photosynthesis ($\text{LayerNetPsn}_i$). Specifically, $\text{LayerGrossAmax}_i$ without water stress is calculated by:
 
-$$\text{LayerGrossAmax}_i = \begin{cases}
-	0 & \text{LayerGrossAmax}_i \le 0 \\
-	\text{PotGrossAmax} \cdot \text{LightEff}_i \cdot {\text{DVPD}} \cdot \text{DTemp}\cdot \text{DayLength} \cdot 12 / 10^9 & \text{LayerGrossAmax}_i > 0
-\end{cases}$$
+$$\text{LayerGrossAmax}_i = \text{PotGrossAmax} \cdot \text{LightEff}_i \cdot {\text{DVPD}} \cdot \text{DTemp}\cdot \text{DayLength} \cdot 12 / 10^9$$
 
-and to estimate $\text{LightEff}_i$, we do the following:
+Note that $\text{LayerGrossAmax}_i \ge 0$.
+
+To estimate $\text{LightEff}_i$, we do the following:
 
 - We use average foliar mass ($\text{AvgFolMass}$) to represent the foliar mass in this layer:
 
-$$\text{AvgFolMass} = \text{FolMass}^m / \text{nlayer}$$
+$$\text{AvgFolMass} = \text{FolMass}^t / \text{nlayer}$$
 
-- Photosynthesis and respiration are calculated on a per unit mass basis, while light attenuation is described by a function of leaf area. So, we use SLW to convert foliar mass to area. $\textcolor{cyan}{\text{SLWmax}}$ is the SLW at the top of the canopy, and $\textcolor{cyan}{\text{SLWdel}}$ is the change in SLW with canopy depth expressed as total foliar mass above a given layer.
-- Calculate layer-specific leaf weight (SLW) using the top sunlit canopy SLW minus change in SLW with increasing foliar mass:
+- Photosynthesis and respiration are calculated on a per unit mass basis, while light attenuation is described by a function of leaf area. So, we use SLW to convert foliar mass to area. Using $\textcolor{cyan}{\text{SLWmax}}$ to represent the SLW at the top of the canopy, and $\textcolor{cyan}{\text{SLWdel}}$ to represent the change in SLW with canopy depth expressed as total foliar mass above a given layer. The layer-specific leaf weight ($\text{SLWLayer}_i$) can be calculated using the top sunlit canopy SLW minus change in SLW with increasing foliar mass:
 
 $$\text{SLWLayer}_i = \textcolor{cyan}{\text{SLWmax}} - \textcolor{cyan}{\text{SLWdel}} \cdot i$$
 
-- Accumulated LAI at this layer is:
+- Accumulated LAI at this layer is then:
 
 $$\text{LAI}_i = \text{LAI}_{i-1} + \text{AvgFolMass} / \text{SLWLayer}_i$$
 
-- Light attenuation in forest canopy is described by the Beers-Lambert exponential decay equation and the effect of light on gross photosynthesis at this year are (Aber et al 1992, Eq. 8, Eq. 9):
+- Light attenuation in forest canopy is described by the Beers-Lambert exponential decay equation and the effect of light on gross photosynthesis at this layer is (Aber et al 1992, Eq. 8, Eq. 9):
 
-$$I_i = \text{PAR}^m \cdot exp(-\textcolor{cyan}{k} \cdot \text{LAI}_i)$$
+$$I_i = \text{PAR}^t \cdot exp(-\textcolor{cyan}{k} \cdot \text{LAI}_i)$$
 
-- At last
+- At last:
 
-$$\text{LightEff}_i = 1.0 - exp(-(I_i \ln(2)) / \textcolor{cyan}{\text{HalfSat}})$$
+$$\text{LightEff}_i = 1.0 - exp(-\frac{I_i \ln(2)}{\textcolor{cyan}{\text{HalfSat}}})$$
 
 Then, this layer's gross and net photosynthesis without water stress is:
 
@@ -107,9 +135,10 @@ $$\begin{align*}
 	&= \text{layerGrossPsn}_i - (\text{DayResp} + \text{NightResp}) \cdot \text{AvgFolMass}
 \end{align*}$$
 
+<!-- #HACK: understand this -->
 However, if $\text{LayerNetPsn}_i < 0$ & $\text{PosCBalMass} == \text{FolMass}$, meaning that net photosynthesis for this layer is negative and the layer is beyond the positive carbon balance mass, we assign the positive carbon balance mass to be the previous layer's accumulated mass:
 
-$$\text{PosCBalMass}^m = (i -1) \cdot \text{AvgFolMass}$$
+$$\text{PosCBalMass} = (i -1) \cdot \text{AvgFolMass}$$
 
 Finally, the accumulated gross and net photosynthesis without water stress for the whole canopy are:
 
@@ -117,9 +146,11 @@ $$\text{CanopyGrossPsn} = \Sigma_{i=1}^{\text{nlayer}} \text{LayerGrossPsn}_i$$
 
 $$\text{CanopyNetPsn}_i = \Sigma_{i=1}^{\text{nlayer}} \text{LayerNetPsn}_i$$
 
-If $\text{DTemp}^m > 0$ & $\text{GDD}_{\text{total}} > \textcolor{cyan}{\text{GDDFolEnd}^{st}}$ & $\text{DOY}^m < \textcolor{cyan}{\text{SenescStart}^{st}}$:
+If $\text{DTemp}^t > 0$ & $\text{GDDTot}^t > \textcolor{cyan}{\text{GDDFolEnd}}$ & $\text{DOY}^t < \textcolor{cyan}{\text{SenescStart}}$:
 
-$$\text{PosCBalMassTot}^m = \text{PosCBalMassTot}^{m-1} + (\text{PosCBalMass}^m \cdot \text{Dayspan}^m)$$
+$$\text{PosCBalMassTot}^t = \text{PosCBalMassTot}^{t-1} + (\text{PosCBalMass}^t \cdot \text{Dayspan})$$
 
-$$\text{PosCBalMassIx}^m = \text{PosCBalMassIx}^{m-1} + (\text{PosCBalMass}^m \cdot \text{Dayspan}^m)$$
+$$\text{PosCBalMassIx}^t = \text{PosCBalMassIx}^{t-1} + (\text{PosCBalMass}^t \cdot \text{Dayspan})$$
 
+<!-- #TODO: Where to learn this O3 effect? -->
+Note that for PnET-CN, we should also consider the O3 effect on photosynthesis. 

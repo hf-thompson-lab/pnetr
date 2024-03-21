@@ -83,5 +83,15 @@ Variables related to vegetation.
 | SoilRespB         | Slope (B) of relationship between mean monthly temperature and soil respiration in PnET II        |                        | Yes       | Soil respiration                                                          |
 
 
+## Internal variables
+
+| Variable     | Description                                                             | Unit | Parameter | Processes |
+| ------------ | ----------------------------------------------------------------------- | ---- | --------- | --------- |
+| PosCBalMass  | #TODO: The foliar biomass needed to maintain a positive carbon balance. |      | Yes       |           |
+| DTemp        | #TODO:                                                                  |      | Yes       |           |
+| PotGrossAmax | #TODO:                                                                  |      | Yes       |           |
+
+
+
 
 

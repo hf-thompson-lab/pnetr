@@ -1,86 +1,97 @@
 # Phenology
 
-Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
-
-- GDDFolEff
-- FolMass
-- FolProdCMo
-- FolGRespMo
-- PosCBalMass
-- LAI
-- FolLitM
-
 Phenology controls the variation of variables in the carbon cycle, it divides the whole year into 4 different stages:
 
-- winter - early spring: during which no photosynthesis since there are no leaves, but maintenance respiration exists.
-- spring - summer: during which leaves start to develop do does photosynthesis and growth respiration.
-- summer - autumn: during which leaves start to senesce and fall off.
-- autumn - winter: during which no photosynthesis b/c the growing season ends.
+- **winter - early spring**: during which no photosynthesis since there are no leaves, but maintenance respiration exists.
+- **spring - summer**: during which leaves start to develop so do photosynthesis and growth respiration.
+- **summer - autumn**: during which leaves start to senesce and fall off.
+- **autumn - winter**: during which no photosynthesis b/c the growing season ends.
+ 
+Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
+
+- $\text{GDDFolEff}$: The growing degree day effect on foliar development.
+- $\text{FolMass}$: Foliar biomass.
+- $\text{FolProdCMo}$: Foliar carbon produced at this time step.
+- $\text{FolGRespMo}$: Foliar growth respiration at this time step.
+- $\text{LAI}$: Leaf area index.
+- $\text{FolLitM}$: Foliar litter biomass.
 
 
 ## Winter - early spring (before SOS)
 
-This period is under the condition $\text{GDD}_{\text{total}}^m < \textcolor{cyan}{\text{GDDFolStart}}$. During this period no leaves are present, thus no photosynthesis is included in the process. Therefore, the following variables are 0:
+This period is under the condition $\text{GDDTot}^t < \textcolor{cyan}{\text{GDDFolStart}}$. During this period no leaves are present, thus no photosynthesis is included in the process. Therefore, the following variables are 0:
 
-- $\text{GDDFolEff}^m = 0$
-- $\text{FolMass}_\text{grow}^m = 0$
-- $\text{FolProdC}^m = 0$
-- $\text{FolGResp}^m = 0$
-- $\text{FolMass}^m = \text{FolMass}^{m-1}$
-- $\text{LAI}^m = \text{LAI}^{m-1}$
-- $\text{FolLitM}^m = 0$
+- $\text{GDDFolEff} = 0$
+- $\text{FolProdCMo} = 0$
+- $\text{FolGRespMo} = 0$
+- $\text{FolLitM} = 0$
+
+And, foliar biomass and LAI are just the same as the last time step:
+
+- $\text{FolMass}^t = \text{FolMass}^{t-1}$
+- $\text{LAI}^t = \text{LAI}^{t-1}$
 
 
 ## Spring - summer (SOS - Senesce)
 
-This period is under the condition $\text{GDD}_{\text{total}}^m \ge \textcolor{cyan}{\text{GDDFolStart}}$ and $\text{DOY}^m < \textcolor{cyan}{\text{SenescStart}}$. During this period, leaves are produced, and photosynthesis has started.
+This period is under the condition $\text{GDDTot}^t \ge \textcolor{cyan}{\text{GDDFolStart}}$ and $\text{DOY}^t < \textcolor{cyan}{\text{SenescStart}}$. During this period, leaves are produced, and photosynthesis has started.
 
-We calculate a GDD foliage effect by
+We calculate a GDD foliage effect by a linear function:
 
-$$\text{GDDFolEff}^m = \frac{\text{GDD}_{\text{total}}^m - \textcolor{cyan}{\text{GDDFolStart}}}{\textcolor{cyan}{\text{GDDFolEnd} - \textcolor{cyan}{\text{GDDFolStart}}}} - \text{GDDFolEff}^{m-1}$$
+$$\text{GDDFolEff}^t = \frac{\text{GDDTot}^t - \textcolor{cyan}{\text{GDDFolStart}}}{\textcolor{cyan}{\text{GDDFolEnd} - \textcolor{cyan}{\text{GDDFolStart}}}}$$
+Note that $\text{GDDFolEff} \in [0, 1]$. 
 
-Then, we use the GDD foliage effect to estimate a foliage biomass production for the month:
+Then, a $\Delta \text{GDDFolEff}$ ($\text{delGDDFolEff}$) can be calculated with: 
+$$\text{delGDDFolEff}^t = \text{GDDFolEff}^t - \text{GDDFolEff}^{t-1}$$
 
-$$\text{FolMass}_\text{grow}^m = \text{BudC} \cdot \text{GDDFolEff}^m / \textcolor{cyan}{\text{CFracBiomass}}$$
+Using this $\Delta \text{GDDFolEff}$ we can get current amount of foliar growth at this time step:
 
-where $\textcolor{cyan}{\text{CFracBiomass}^{sp}}$ is the carbon fraction of foliage mass. And, the current month's total foliar mass would be:
+$$\text{FolMass}^t = \text{FolMass}^{t-1} + \text{BudC} \cdot \text{delGDDFolEff}^t / \textcolor{cyan}{\text{CFracBiomass}}$$
 
-$$\text{FolMass}^m = \text{FolMass}^{m-1} + \text{FolMass}_\text{grow}^m$$
+where $\textcolor{cyan}{\text{CFracBiomass}}$ is the carbon fraction of the foliar biomass. 
 
-And, the current month's foliar carbon production and respiration would be:
+So, the current time step's foliar carbon production and respiration would be:
 
-$$\text{FolProdC}^m = \text{FolMass}_\text{grow}^m \cdot \textcolor{cyan}{\text{CFracBiomass}}$$
+$$\text{FolProdCMo}^t = (\text{FolMass}^t - \text{FolMass}^{t-1}) \cdot \textcolor{cyan}{\text{CFracBiomass}}$$
 
-$$\text{FolGResp}^m = \text{FolProdC}^m \cdot \textcolor{cyan}{\text{GRespFrac}}$$
+$$\text{FolGRespMo}^t = \text{FolProdCMo}^t \cdot \textcolor{cyan}{\text{GRespFrac}}$$
 
 where $\textcolor{cyan}{\text{GRespFrac}}$ is growth respiration as a fraction of allocation.
 
 
 ## Summer - autumn (Senesce - EOS)
 
-This period is under the condition $\text{GDD}_{\text{total}}^m \ge \textcolor{cyan}{\text{GDDFolStart}}$ and $\text{DOY}^m \ge \textcolor{cyan}{\text{SenescStart}}$ and $\text{GDD}_{\text{total}}^m < \textcolor{cyan}{\text{GDDFolEnd}}$. During this period, leaves are falling.
+This period is under the condition $\text{GDDTot}^t \ge \textcolor{cyan}{\text{GDDFolStart}}$ and $\text{DOY}^t \ge \textcolor{cyan}{\text{SenescStart}}$ and $\text{GDDTot}^t < \textcolor{cyan}{\text{GDDFolEnd}}$. During this period, leaves are falling.
 
-$$\text{FolMassNew}^m = \max(\text{PosCBalMass}, \text{FolMassMin})$$
+The new foliar biomass is:
+$$\text{FolMassNew}^t = \max(\text{PosCBalMass}, \text{FolMassMin})$$
+where $\text{PosCBalMass}$ is calculated in the [Photosynthesis module](/doc/Photosynthesis.md), and $\text{FolMassMin}$ is the minimum foliar biomass of the tree species during the year (e.g., $\text{FolMassMin} = 0$ for deciduous trees). 
 
-Then, $\text{LAI}^m$ can be calculated as:
+<!-- # HACK: LAI is not calculated in the spring? -->
+Then, leaf area index at this time step ($\text{LAI}^t$) can be calculated as:
+$$\text{LAI}^t = \text{LAI}^{t-1} \cdot \frac{\text{FolMassNew}^t}{\text{FolMass}^{t-1}} \ (0 \le \text{FolMassNew}^t \le \text{FolMass}^{t-1})$$
+<!-- \\$$\text{LAI}^t = \begin{cases} -->
+<!-- \text{LAI}^{t-1} \cdot \text{FolMassNew}^t / \text{FolMass}^t & 0 < \text{FolMassNew}^t < \text{FolMass}^t \\
+	0 & \text{FolMassNew}^t = 0
+\end{cases}$$ -->
 
-$$\text{LAI}^m = \begin{cases}
-	\text{LAI}^{m-1} \cdot \text{FolMassNew}^m / \text{FolMass}^m & 0 < \text{FolMassNew}^m < \text{FolMass}^m \\
-	0 & \text{FolMassNew}^m = 0
-\end{cases}$$
+If $\text{FolMassNew}^t < \text{FolMass}^{t-1}$, it means leaf litter was produced:
+$$\text{FolLitM}^t = \text{FolMass}^{t-1} - \text{FolMassNew}^t$$
 
-Then, we can update $\text{FolMass}^m = \text{FolMassNew}^m$.
-
+At last, we update $\text{FolMass}^t = \text{FolMassNew}^t$.
 
 ## Autumn - winter (after EOS)
 
-This period is under the condition $\text{GDD}_{\text{total}}^m \ge \textcolor{cyan}{\text{GDDFolEnd}}$. During this period the growing season has ended thus no photosynthesis and the following variables are 0:
+This period is under the condition $\text{GDDTot}^t \ge \textcolor{cyan}{\text{GDDFolEnd}}$. During this period the growing season has ended thus no photosynthesis and the following variables are 0:
 
-- $\text{GDDFolEff}^m = 0$
-- $\text{FolMass}_\text{grow}^m = 0$
-- $\text{FolProdC}^m = 0$
-- $\text{FolGResp}^m = 0$
-- $\text{FolMass}^m = \text{FolMass}^{m-1}$
-- $\text{LAI}^m = \text{LAI}^{m-1}$
+- $\text{GDDFolEff} = 0$
+- $\text{FolProdCMo} = 0$
+- $\text{FolGRespMo} = 0$
+- $\text{FolLitM} = 0$
+
+And, foliar biomass and LAI are just the same as the last time step:
+
+- $\text{FolMass}^t = \text{FolMass}^{t-1}$
+- $\text{LAI}^t = \text{LAI}^{t-1}$
 
 

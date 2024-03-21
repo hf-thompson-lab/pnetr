@@ -21,42 +21,61 @@ Notations:
 
 > A table of all variables and descriptions can be found [here](/doc/paramters_table.md).
 
-I sometimes use the following superscripts to specifically represent the time scale of a variable:
+Unless it's obvious, I use the following superscripts to specifically represent the time scale of a variable:
 
+- $t$ is a general time scale
 - $d$ is day
 - $m$ is month
 - $k$ is year
 
 Colors are used to distinguish different variable types:
 
-- $\textcolor{lime}{Observation}$
-- $\textcolor{cyan}{Prescribed}$
+- $\textcolor{lime}{Observed\ variables}$, these variables are obtained from data, e.g., temperature and precipitation records.
+- $\textcolor{cyan}{Prescribed\ variables}$, these variables are either fixed by the models or can be calibrated by users.
 
 The following are the major modules encoded in the PnET model framework:
 
 - **[AtmEnviron](/doc/AtmEnviron.md)**: atmospheric environmental variables.
-- **[Phenology](/doc/Phenology.md)**: controls growing season timing and length, mainly consists of start-of-season (SOS), start of woody growth, senescence, and end-of-season (EOS).
+- **[Phenology](/doc/Phenology.md)**: controls growing season timing and length, mainly consists of start of leaf development (start-of-season, SOS), start of woody growth, leaf senescence, and leaf fully fall (end-of-season, EOS).
 - **[Photosynthesis](/doc/Photosynthesis.md)**: determines carbon productivity, respiration, and leaf development.
-- **[Water Balance](/doc/Water%20Balance.md)**: controls water availability and impacts of water on photosynthesis.
+- **[Water Balance](/doc/Water%20Balance.md)**: controls water cycling and impacts of water availability on photosynthesis.
 - **[Soil Respiration](/doc/Soil%20Respiration.md)**: carbon reparation in soil.
-- **[Allocation](/doc/Allocation.md)**: allocates monthly and annual carbon gain for growth.
+- **[Allocation](/doc/Allocation.md)**: allocates monthly and annual carbon gain for growth and respiration.
 - **[CNTrans](/doc/CNTrans.md)**: calculates litterfall and transfers to soil organic matter.
 - **[Decomp](/doc/Decomp.md)**: calculates C and N mineralization and nitrification and also matches N availability with plant N demand to determine N uptake. In the code scripts, the NUptake routine in Aber et al 1997, which combines N availability with the strength of plant demand to determine the uptake of N into the PlantN pool, is also included in this module.
 - **[Leach](/doc/Leach.md)**: calculates leaching losses of nitrate.
 
-Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/AtmEnviron.md)**, which is the same across models.
+Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/AtmEnviron.md)**, which is the same across all models.
 
 ### PnET-Day
 
 PnET-Day is the simplest model in this family, it only simulates [Photosynthesis](/doc/Photosynthesis.md). So, this model only includes [AtmEnviron](/doc/AtmEnviron.md), [Phenology](/doc/Phenology.md), and [Photosynthesis](/doc/Photosynthesis.md).
 
+```mermaid
+flowchart TD
+
+foln[Foliar N Concentration] --> Amax
+Amax --> maxGPP[Max Gross Photosynthesis]
+maxGPP --- env{{+ Foliar mass \n + Radiation \n + VPD \n + Temperature}}
+env --> realGPP[Realized Gross Photosynthesis]
+
+Amax --> basalResp[Basal Respiration]
+basalResp --- env2{{+ Temperature}}
+env2 --> realResp[Realized Respiration]
+```
+
 ### PnET-II
 
 PnET-II includes all 6 modules sequentially ([AtmEnviron](/doc/AtmEnviron.md), [Phenology](/doc/Phenology.md), [Photosynthesis](/doc/Photosynthesis.md), [Water Balance](/doc/Water%20Balance.md), [Soil Respiration](/doc/Soil%20Respiration.md), [Allocation](/doc/Allocation.md)). 
 
+![pnet-ii-model](/doc/pnet-ii-diagram.svg)
+
+
 ### PnET-CN
 
 PnET-CN builds upon PnET-II and includes nitrogen cycling. It introduces [CNTrans](/doc/CNTrans.md), [Decomp](/doc/Decomp.md), [Leach](/doc/Leach.md) modules and modifies the [Allocation](/doc/Allocation.md) module.
+
+![pnet-cn-model](/doc/pnet-cn-diagram.svg)
 
 ### PnET-Daily
 
