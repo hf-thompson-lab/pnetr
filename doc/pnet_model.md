@@ -79,11 +79,27 @@ basalResp --- env2{{+ Temperature}}
 env2 --> realResp[Realized Respiration]
 ```
 
+```mermaid
+flowchart TD
+
+foln[Foliar N Concentration] --> Amax
+Amax --> maxGPP[Max Gross Photosynthesis]
+maxGPP --- env{{+ Foliar mass \n + Radiation \n + VPD \n + Temperature}}
+env --> realGPP[Realized Gross Photosynthesis]
+
+Amax --> basalResp[Basal Respiration]
+basalResp --- env2{{+ Temperature}}
+env2 --> realResp[Realized Respiration]
+```
+
 ### PnET-II
 
 PnET-II includes all 6 modules sequentially ([AtmEnviron](/doc/atm_environ.md), [Phenology](/doc/phenology.md), [Photosynthesis](/doc/photosynthesis.md), [Water Balance](/doc/water_balance.md), [Soil Respiration](/doc/soil_respiration.md), [Allocation](/doc/allocation.md)). 
 
 ![pnet-ii-model](/doc/pnet-ii_diagram.svg)
+
+
+![pnet-ii-model](/doc/pnet-ii-diagram.svg)
 
 
 ### PnET-CN
