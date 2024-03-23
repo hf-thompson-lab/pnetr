@@ -1,6 +1,6 @@
 # PnET-R
 
-<img src="doc/pnetr_logo.png" align="right" height="138" />
+<img src="doc/pnetr_logo.svg" align="right" height="138" />
 
 The R version of the Photosynthetic and EvapoTranspiration model family. 
 
