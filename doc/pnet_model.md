@@ -5,13 +5,28 @@ PnET stands for **P**hotosy**n**thesis and **E**vapo**T**ranspiration, it's a si
 The PnET model family consists of several models including:
 
 - [The original PnET](https://doi.org/10.1007/BF00317837)
-- [PnET-II](https://doi.org/10.1007/BF00317837)
 - [PnET-Day](http://www.jstor.org/stable/4221255)
+- [PnET-II](https://doi.org/10.1007/BF00317837)
 - [PnET-CN](https://linkinghub.elsevier.com/retrieve/pii/S0304380097019534)
-- [PnET-Daily]() (2013)
-- [PnET-SOM]() (2013-present).
 
 In this package, we currently provide PnET-II, PnET-Day, and PnET-CN. Note that the PnET-II model is actually an improved version of the original paper ([Aber et al 1995](https://doi.org/10.1007/BF00317837)), it also incorporates some parts of the PnET-Day model ([Aber et al 1996](http://www.jstor.org/stable/4221255)).
+
+Here is a figure summarizing the milestones in model development and their references:
+
+```mermaid
+flowchart LR
+
+subgraph PnET
+    op["Orignal PnET \n (Aber et al 1992)"] --> pnetiiv1["PnET-II \n (Aber et al 1995)"]
+    pnetday["PnET-Day \n (Aber et al 1996)"]
+    pnetday --> pnetiiv2["Improved PnET-II \n (Aber et al 1996)"]
+    pnetiiv1 --+Water\n +Allocation--> pnetiiv2
+    pnetiiv2 -- +Nitrogen cycle--> pnetcn["PnET-CN \n (Aber et al 1997)"]
+end
+
+PnET --> o3["+O3 effect on photosynthesis \n (Ollinger et al 1997)"]
+o3 --> co2["+CO2 effect on photosynthesis \n (Ollinger et al 2002)"]
+```
 
 ## Model Overview
 
@@ -35,21 +50,21 @@ Colors are used to distinguish different variable types:
 
 The following are the major modules encoded in the PnET model framework:
 
-- **[AtmEnviron](/doc/AtmEnviron.md)**: atmospheric environmental variables.
-- **[Phenology](/doc/Phenology.md)**: controls growing season timing and length, mainly consists of start of leaf development (start-of-season, SOS), start of woody growth, leaf senescence, and leaf fully fall (end-of-season, EOS).
-- **[Photosynthesis](/doc/Photosynthesis.md)**: determines carbon productivity, respiration, and leaf development.
-- **[Water Balance](/doc/Water%20Balance.md)**: controls water cycling and impacts of water availability on photosynthesis.
-- **[Soil Respiration](/doc/Soil%20Respiration.md)**: carbon reparation in soil.
-- **[Allocation](/doc/Allocation.md)**: allocates monthly and annual carbon gain for growth and respiration.
-- **[CNTrans](/doc/CNTrans.md)**: calculates litterfall and transfers to soil organic matter.
-- **[Decomp](/doc/Decomp.md)**: calculates C and N mineralization and nitrification and also matches N availability with plant N demand to determine N uptake. In the code scripts, the NUptake routine in Aber et al 1997, which combines N availability with the strength of plant demand to determine the uptake of N into the PlantN pool, is also included in this module.
-- **[Leach](/doc/Leach.md)**: calculates leaching losses of nitrate.
+- **[AtmEnviron](/doc/atm_environ.md)**: atmospheric environmental variables.
+- **[Phenology](/doc/phenology.md)**: controls growing season timing and length, mainly consists of start of leaf development (start-of-season, SOS), start of woody growth, leaf senescence, and leaf fully fall (end-of-season, EOS).
+- **[Photosynthesis](/doc/photosynthesis.md)**: determines carbon productivity, respiration, and leaf development.
+- **[Water Balance](/doc/water_balance.md)**: controls water cycling and impacts of water availability on photosynthesis.
+- **[Soil Respiration](/doc/soil_respiration.md)**: carbon reparation in soil.
+- **[Allocation](/doc/allocation.md)**: allocates monthly and annual carbon gain for growth and respiration.
+- **[CNTrans](/doc/cntrans.md)**: calculates litterfall and transfers to soil organic matter.
+- **[Decomp](/doc/decomp.md)**: calculates C and N mineralization and nitrification and also matches N availability with plant N demand to determine N uptake. In the code scripts, the NUptake routine in Aber et al 1997, which combines N availability with the strength of plant demand to determine the uptake of N into the PlantN pool, is also included in this module.
+- **[Leach](/doc/leach.md)**: calculates leaching losses of nitrate.
 
-Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/AtmEnviron.md)**, which is the same across all models.
+Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/atm_environ.md)**, which is the same across all models.
 
 ### PnET-Day
 
-PnET-Day is the simplest model in this family, it only simulates [Photosynthesis](/doc/Photosynthesis.md). So, this model only includes [AtmEnviron](/doc/AtmEnviron.md), [Phenology](/doc/Phenology.md), and [Photosynthesis](/doc/Photosynthesis.md).
+PnET-Day is the simplest model in this family, it only simulates [Photosynthesis](/doc/photosynthesis.md). So, this model only includes [AtmEnviron](/doc/atm_environ.md), [Phenology](/doc/phenology.md), and [Photosynthesis](/doc/photosynthesis.md).
 
 ```mermaid
 flowchart TD
@@ -66,20 +81,13 @@ env2 --> realResp[Realized Respiration]
 
 ### PnET-II
 
-PnET-II includes all 6 modules sequentially ([AtmEnviron](/doc/AtmEnviron.md), [Phenology](/doc/Phenology.md), [Photosynthesis](/doc/Photosynthesis.md), [Water Balance](/doc/Water%20Balance.md), [Soil Respiration](/doc/Soil%20Respiration.md), [Allocation](/doc/Allocation.md)). 
+PnET-II includes all 6 modules sequentially ([AtmEnviron](/doc/atm_environ.md), [Phenology](/doc/phenology.md), [Photosynthesis](/doc/photosynthesis.md), [Water Balance](/doc/water_balance.md), [Soil Respiration](/doc/soil_respiration.md), [Allocation](/doc/allocation.md)). 
 
-![pnet-ii-model](/doc/pnet-ii-diagram.svg)
+![pnet-ii-model](/doc/pnet-ii_diagram.svg)
 
 
 ### PnET-CN
 
-PnET-CN builds upon PnET-II and includes nitrogen cycling. It introduces [CNTrans](/doc/CNTrans.md), [Decomp](/doc/Decomp.md), [Leach](/doc/Leach.md) modules and modifies the [Allocation](/doc/Allocation.md) module.
+PnET-CN builds upon PnET-II and includes nitrogen cycling. It introduces [CNTrans](/doc/cntrans.md), [Decomp](/doc/decomp.md), [Leach](/doc/leach.md) modules and modifies the [Allocation](/doc/allocation.md) module.
 
-![pnet-cn-model](/doc/pnet-cn-diagram.svg)
-
-### PnET-Daily
-
-PnET-Daily is a daily scale model while other models in the family are monthly scale.
-
-### PnET-SOM
-
+![pnet-cn-model](/doc/pnet-cn_diagram.svg)

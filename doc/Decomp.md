@@ -1,40 +1,23 @@
 # Decomp
 
-Reference: [[aber1997Modeling]].
+This routine calculates C and N mineralization and nitrification and also matches N availability with plant N demand to determine N uptake. Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
 
-Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
+- $\text{NO3}$: Nitrogen deposition in NO3.
+- $\text{NH4}$: Nitrogen deposition in NH4.
+- $\text{NdepTot}$: Total amount of nitrogen deposition.
+- $\text{HOM}$: 
+- $\text{HON}$:
+- $\text{SoilDecResp}$: Soil decompostion respiration.
+- $\text{SoilDecRespYr}$: The annual accumulated soil decomposition respiration.
+- $\text{GrossNMinYr}$: The annual accumulated gross N mineralization
+- $\text{NetCBal}$: Net carbon balance.
+- $\text{GrossNImmobYr}$: The annual accumulated gross N immobilization
+- $\text{NetNMinYr}$: 
+- $\text{NetNitrYr}$:
+- $\text{PlantN}$: Plant N pool.
+- $\text{PlantNUptakeYr}$: The annual accumulated plant N uptake.
 
-- $\text{NO3}$
-- $\text{NH4}$
-- $\text{NdepTot}$
-- $\text{tEffSoil}$
-- $\text{TMult}$
-- $\text{WMult}$
-- $\text{HOM}$
-- $\text{HON}$
-- $\text{KhoAct}$
-- $\text{DHO}$
-- $\text{GrossNMin}$
-- $\text{SoilDecResp}$
-- $\text{SoilDecRespYr}$
-- $\text{GrossNMinYr}$
-- $\text{NetCBal}$
-- $\text{SoilPctN}$
-- $\text{NReten}$
-- $\text{GrossNImmob}$
-- $\text{GrossNImmobYr}$
-- $\text{NetNMin}$
-- $\text{NetNMinYr}$
-- $\text{NetNitr}$
-- $\text{NetNitrYr}$
-- $\text{RootNSinkStr}$
-- $\text{PlantNUptake}$
-- $\text{PlantNUptakeYr}$
-- $\text{PlantN}$
-- $\text{NH4Up}$
-- $\text{NO3Up}$
 
-This module determines the mineralization of C and N, net nitrification, plant uptake demand, and total plant N uptake. 
 ## Atmospheric N deposition
 
 The current month's atmospheric N deposition is added from the climate data:
@@ -65,11 +48,11 @@ $$\text{NReten} = (\textcolor{cyan}{\text{NImmobA}} + \textcolor{cyan}{\text{NIm
 
 where $\text{NReten}$ is the fraction of mineralized N which is re-immobilized. $\text{SoilPctN}$ is the percentage of N in soil organic matter. The values of $\textcolor{cyan}{\text{NImmobA}}$ and $\textcolor{cyan}{\text{NImmobB}}$ were selected to allow complete re-immobilization of all mineralized N at 1.5% in SOM and decrease to zero re-immobilization at 4.3%.
 
-Gross N immobilization is calculated as:
+Gross N immobilization ($\text{GrossNImmob}$) is calculated as:
 
 $$\text{GrossNImmob} = \text{GrossNMin} \cdot \text{NReten}$$
 
-And, net N mineralization is gross N mineralization minus gross N immobilization: 
+And, net N mineralization ($\text{NetNMin}$) is gross N mineralization minus gross N immobilization: 
 
 $$\text{NetNMin} = \text{GrossNMin} - \text{GrossNImmob}$$
 

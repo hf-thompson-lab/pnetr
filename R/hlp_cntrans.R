@@ -109,6 +109,8 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
     RootMass <- share$vars$RootMass - RootLitM
     RootMassN <- share$vars$RootMassN - RootLitN
 
+
+    # Wood litter mass and N
     if (BiomLossFrac > 0) {
         WoodLitM <- share$vars$WoodMass * BiomLossFrac * (1 - RemoveFrac)
         WoodLitN <- share$vars$WoodMassN * BiomLossFrac * (1 - RemoveFrac)

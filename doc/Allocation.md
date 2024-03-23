@@ -1,54 +1,56 @@
 # Allocation
 
-Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
+This routine allocates carbon and nitrogen to different parts of the plant system such as wood, root, and bud, in a monthly or annually time scale. Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description):
 
 - Monthly allocation
-	- BudC
-	- WoodC
-	- RootC
-	- PlantC
-	- WoodMRespYr
-	- FolProdCYr
-	- FolGRespYr
-	- GDDWoodEff
-	- WoodProdCYr
-	- WoodGRespYr
-	- RootProdCYr
-	- RootMRespYr
-	- RootGRespYr
-	- NetCBal
+	- $\text{BudC}$: Bud carbon pool.
+	- $\text{WoodC}$: Wood carbon pool.
+	- $\text{RootC}$: Root carbon pool.
+	- $\text{PlantC}$: Plant total carbon pool.
+	- $\text{WoodMRespYr}$: Wood maintenance respiration.
+	- $\text{FolProdCYr}$: The amount of carbon required by foliar production.
+	- $\text{FolGRespYr}$: Foliar growth repiration.
+	- $\text{GDDWoodEff}$: Growing degree day effect on wood production.
+	- $\text{WoodProdCYr}$: The amount of carbon required by wood production.
+	- $\text{WoodGRespYr}$: Wood growth respiration.
+	- $\text{RootProdCYr}$: The amount of carbon required by root production.
+	- $\text{RootMRespYr}$: The annual accumulated root maintanence respiration.
+	- $\text{RootGRespYr}$: The annual accumulated root growth respiration.
+	- $\text{NetCBal}$: Net carbon balance.
 - Annual allocation
-	- BudC
-	- WoodC
-	- RootC
-	- PlantC
-	- NPPFolYr
-	- NPPWoodYr
-	- NPPRootYr
-	- FolMassMax (in VegPar)
-	- FolMassMin (in VegPar)
-	- NEP
-	- FolN (PnET-CN)
-	- FolC (PnET-CN)
-	- TotalN (PnET-CN)
-	- TotalM (PnET-CN)
-	- BudN (PnET-CN)
-	- PlantN (PnET-CN)
-	- FolNCon (PnET-CN)
+	- $\text{BudC}$: Bud carbon pool.
+	- $\text{WoodC}$: Wood carbon pool.
+	- $\text{RootC}$: Root carbon pool.
+	- $\text{PlantC}$: Plant total carbon pool.
+	- $\text{NPPFolYr}$: The annual accumulated net primary productivity of foliage.
+	- $\text{NPPWoodYr}$: The annual accumulated net primary productivity of wood.
+	- $\text{NPPRootYr}$: The annual accumulated net primary productivity of root.
+	- $\text{FolMassMax}$ (in VegPar): The maximum foliage amount.
+	- $\text{FolMassMin}$ (in VegPar): The minimum foliage amount.
+	- $\text{NEP}$: Net ecosystem productivity.
+	- $\text{FolN}$ (PnET-CN): Foliar nitrogen amount.
+	- $\text{FolC}$ (PnET-CN): Foliar carbon amount.
+	- $\text{TotalN}$ (PnET-CN): Total nitrogen amount.
+	- $\text{TotalM}$ (PnET-CN): Total 
+	- $\text{BudN}$ (PnET-CN): The amount of nitrogen in buds.
+	- $\text{PlantN}$ (PnET-CN): The amount of nitrogen in plant.
+	- $\text{FolNCon}$ (PnET-CN): Foliar nitrogen concentration.
+
 
 ## Monthly allocation
 
-The plant carbon pool in current month:
+The plant carbon pool in current month is first calculated by considering this month's net photosynthesis ($\text{NetPsn}$) and foliar growth respiration ($\text{FolGResp}$):
 
 $$\text{PlantC}^m = \text{PlantC}^{m-1} + \text{NetPsn}^m - \text{FolGResp}^m$$
 
-### Wood carbon allocation
+Then, the available carbon is allocated to wood and root respectively.
 
-<!-- TODO: does this make sense? -->
+
+### Wood carbon allocation
 
 The wood maintenance respiration is calculated as a fraction of canopy gross photosynthesis with water stress:
 
-$$\text{WoodMResp}^m = \text{CanopyGrossPsnAct}^m \cdot \textcolor{cyan}{\text{WoodMRespA}}$$
+$$\text{WoodMResp} = \text{CanopyGrossPsnAct} \cdot \textcolor{cyan}{\text{WoodMRespA}}$$
 
 The annual wood respiration, foliage production, and foliage respiration are accumulated:
 
@@ -58,21 +60,21 @@ $$\text{FolProdCYr} = \Sigma_{m=1}^{12} \text{FolProdCMo}$$
 
 $$\text{FolGRespYr} = \Sigma_{m=1}^{12} \text{FolGRespMo}$$
 
-Note that $\text{FolProdCMo}$ and $\text{FolGRespMo}$ are calculated in the phenology section.
+Note that $\text{FolProdCMo}$ and $\text{FolGRespMo}$ are calculated in the [Phenology](/doc/phenology.md) routine.
 
-If $\text{GDD}_{\text{total}} \geq \textcolor{cyan}{\text{GDDWoodStart}}$, which means wood production has started:
+Since wood production only happens in the growing season, we use $\text{GDDTot}^m \geq \textcolor{cyan}{\text{GDDWoodStart}}$ to determine when carbon should be allocated to wood production. The effect of GDD on this month's wood production is an empirical linear function:
 
-$$\text{GDDWoodEff}^m = \frac{\text{GDD}_{\text{total}}^m - \textcolor{cyan}{\text{GDDWoodStart}}}{\textcolor{cyan}{\text{GDDWoodEnd}} - \textcolor{cyan}{\text{GDDWoodStart}}}$$
+$$\text{GDDWoodEff}^m = \frac{\text{GDDTot}^m - \textcolor{cyan}{\text{GDDWoodStart}}}{\textcolor{cyan}{\text{GDDWoodEnd}} - \textcolor{cyan}{\text{GDDWoodStart}}}$$
 
-$$\text{GDDWoodEff}^m = max(0, min(1.0, \text{GDDWoodEff}^m))$$
+Note that $0 \le \text{GDDWoodEff} \le 1$. The additional GDD effect on wood production for this time step is then:
 
 $$\text{delGDDWoodEff}^m = \text{GDDWoodEff}^m - \text{GDDWoodEff}^{m-1}$$
 
-The produced wood for this month is:
+The wood production for this month is a fraction of the wood carbon pool and the additional GDD effect:
 
 $$\text{WoodProdC}^m = \text{WoodC}^m \cdot \text{delGDDWoodEff}^m$$
 
-The growth respiration of the wood is:
+The wood growth respiration is then a fraction of the $\text{WoodProdC}$:
 
 $$\text{WoodGResp}^m = \text{WoodProdC}^m \cdot \textcolor{cyan}{\text{GRespFrac}}$$
 
@@ -82,7 +84,8 @@ $$\text{WoodProdCYr} = \Sigma_{m=1}^{12} \text{WoodProdC}^m$$
 
 $$\text{WoodGRespYr} = \Sigma_{m=1}^{12} + \text{WoodGResp}^m$$
 
-Otherwise, if $\text{GDD}_{\text{total}} < \textcolor{cyan}{\text{GDDWoodStart}}$, which means wood production has not started, $\text{WoodProdC}^m$ and $\text{WoodGResp}^m$ are both 0.
+Otherwise, if $\text{GDDTot}^m < \textcolor{cyan}{\text{GDDWoodStart}}$, which means wood production has not started, $\text{WoodProdC}^m$ and $\text{WoodGResp}^m$ are both 0.
+
 
 ### Root carbon allocation
 
@@ -91,7 +94,6 @@ This month's added root carbon is calculated as a linear function of $\text{FolP
 $$\text{RootCAdd}^m = \textcolor{cyan}{\text{RootAllocA}} \cdot (\text{Dayspan}^m / 365.0) + \textcolor{cyan}{\text{RootAllocB}} \cdot \text{FolProdC}^m$$
 
 <!-- TODO: this part is a bit confusing. -->
-
 Then, this month's accumulated root carbon is:
 
 $$\text{RootC}^m = \text{RootC}^{m-1} + \text{RootCAdd}^m$$
@@ -122,18 +124,81 @@ $$\text{RootGResp}^m = \text{RootProdC}^m \cdot \textcolor{cyan}{\text{GRespFrac
 
 $$\text{RootGRespYr} = \Sigma_{m=1}^{12} \text{RootGResp}^m$$
 
-The remaining plant carbon pool is then:
 
-$$\text{PlantC} = \text{PlantC} - \text{RootCAdd} - \text{WoodMResp}^m - \text{WoodGResp}^m$$
+### Update PlantC
+
+After root and wood allocation, the remaining plant carbon pool is:
+
+$$\text{PlantC}^m = \text{PlantC}^{m-1} - \text{RootCAdd}^m - \text{WoodMResp}^m - \text{WoodGResp}^m$$
 
 And the net carbon balance is:
 
-$$\text{NetCBal} = \text{NetPsnMo} - \text{SoilRespMo} - \text{WoodMResp}^m - \text{WoodGResp}^m - \text{FolGRespMo}$$
+$$\text{NetCBal}^m = \text{NetPsnMo}^m - \text{SoilRespMo}^m - \text{WoodMResp}^m - \text{WoodGResp}^m - \text{FolGRespMo}^m$$
 
 
-## Annual carbon allocation
+## Annual allocation
 
-In addition to monthly carbon allocation, there is also an annual carbon allocation.
+Annual allocation happens in the begining of a year, this routine allocates carbon and nitrogen (PnET-CN) into different pools and calculate annual net primary productivity (NPP) and carbon & nitrogen balance.
+
+The maximum foliage of the vegetion is calculated as:
+
+$$\text{FolMassMax} = \min(\text{EnvMaxFol}, \text{SppMaxFol})$$
+
+where $\text{SppMaxFol}$ and $\text{EnvMaxFol}$ are calculated as:
+
+$$\text{SppMaxFol} = \text{avgPCBM} \cdot (1 + \text{FolRelGrowMax} \cdot \text{LightEffMin})$$
+
+$$\text{EnvMaxFol} = \text{avgDWater} \cdot \text{SppMaxFol}$$
+
+in which the average positive carbon balance biomass ($\text{avgPCBM}$) and water effect on photosynthesis ($\text{avgDWater}$) are:
+
+$$\text{avgPCBM} = \begin{cases}
+	\text{PosCbalMassTot} / \text{PosCBalMassIx} & \text{PosCBalMassIx} > 0 \\
+	\text{FolMass} & \text{PosCBalMassIx} \leq 0
+\end{cases}$$
+
+$$\text{avgDWater} = \begin{cases}
+	\text{Dwatertot} / \text{DwaterIx} & \text{DwaterIx} > 0 \\
+	1 & \text{DwaterIx} \leq 0
+\end{cases}$$
+
+The minimum foliage of the vegetation is a fraction of the $\text{FolMassMax}$:
+
+$$\text{FolMassMin} = \text{FolMassMax} - \text{FolMassMax} \cdot 1 / \text{FolReten}$$
+
+Now, allocate carbon to the bud carbon pool:
+
+$$\text{BudC} = \min(0, (\text{FolMassMax} - \text{FolMass}) \cdot \text{CFracBiomass})$$
+
+And, update the remaining $\text{PlantC}$:
+
+$$\text{PlantC} = \text{PlantC} - \text{BudC}$$
+
+Then, allocate carbon too the wood carbon pool:
+
+$$\text{WoodC} = (1 - \text{PlantCReserveFrac}) \cdot \text{PlantC}$$
+
+And, update the remaining $\text{PlantC}$ **again**:
+
+$$\text{PlantC} = \text{PlantC} - \text{WoodC}$$
+
+Note that $\text{MinWoodFolRatio}$ controls the minimum ratio of wood carbon to bud carbon, so if the calculated $\text{WoodC} < \text{MinWoodFolRatio} \cdot \text{BudC}$, $\text{WoodC}$ and $\text{BudC}$ need to be calibrated:
+
+$$\text{TotalC} = \text{WoodC} + \text{BudC}$$
+
+$$\text{WoodC} = \text{TotalC} \cdot \frac{\text{MinWoodFolRatio}}{1 + \text{MinWoodFolRatio}}$$
+
+$$\text{BudC} = \text{TotalC} - \text{WoodC}$$
+
+At the same time, the annual maximum and minimum foliar mass are updated as:
+
+$$\text{FolMassMax} = \text{FolMass} + \frac{\text{BudC}}{\text{CFracBiomass}}$$
+
+$$\text{FolMassMin} = \text{FolMassMax} - \text{FolMassMax} \cdot \frac{1}{\text{FolReten}}$$
+
+At last, the annual net ecosystem productivity (NEP) is then calculated as:
+
+$$\text{NEP} = \text{TotPsn} - \text{WoodMRespYr} - \text{WoodGRespYr} - \text{FolGRespYr} - \text{SoilRespYr}$$
 
 Annual NPP for foliage, wood, and root:
 
@@ -142,58 +207,6 @@ $$\text{NPPFolYr} = \text{FolProdCYr} / \textcolor{cyan}{\text{CFracBiomass}^{sp
 $$\text{NPPWoodYr} = \text{WoodProdCYr} / \textcolor{cyan}{\text{CFracBiomass}^{sp}}$$
 
 $$\text{NPPRootYr} = \text{RootProdCYr} / \textcolor{cyan}{\text{CFracBiomass}^{sp}}$$
-
-The average water effect on photosynthesis:
-
-$$\text{AvgDWater} = \begin{cases}
-	\text{Dwatertot} / \text{DwaterIx} & \text{DwaterIx} > 0 \\
-	1 & \text{DwaterIx} \leq 0
-\end{cases}$$
-
-The average PCBM:
-
-$$\text{avgPCBM} = \begin{cases}
-	\text{PosCbalMassTot} / \text{PosCBalMassIx} & \text{PosCBalMassIx} > 0 \\
-	\text{FolMass} & \text{PosCBalMassIx} \leq 0
-\end{cases}$$
-
-$$\text{EnvMaxFol} = (\text{AvgDWater} \cdot \text{avgPCBM}) \cdot (1 + \text{FolRelGrowMax} \cdot \text{LightEffMin})$$
-
-$$\text{SppMaxFol} = \text{avgPCBM} \cdot (1 + \text{FolRelGrowMax} \cdot \text{LightEffMin})$$
-
-The maximum and minimum foliage of the vegetation is:
-
-$$\text{FolMassMax} = \min(\text{EnvMaxFol}, \text{SppMaxFol})$$
-
-$$\text{FolMassMin} = \text{FolMassMax} - \text{FolMassMax} \cdot \frac{1}{\text{FolReten}}$$
-
-$$\text{BudC} = \min(0, (\text{FolMassMax} - \text{FolMass}) \cdot \text{CFracBiomass})$$
-
-$$\text{PlantC} = \text{PlantC} - \text{BudC}$$
-
-$$\text{WoodC} = (1 - \text{PlantCReserveFrac}) \cdot \text{PlantC}$$
-
-<!-- TODO: BudC and WoodC may be calibrated later but seems PlantC does not, why? -->
-
-$$\text{PlantC} = \text{PlantC} - \text{WoodC}$$
-
-$\text{MinWoodFolRatio}$ controls the minimum ratio of wood carbon to bud carbon, so if the calculated $\text{WoodC} < \text{MinWoodFolRatio} \cdot \text{BudC}$, the $\text{WoodC}$ and $\text{BudC}$ need to be calibrated:
-
-$$\text{TotalC} = \text{WoodC} + \text{BudC}$$
-
-$$\text{WoodC} = \text{TotalC} \cdot \frac{\text{MinWoodFolRatio}}{1 + \text{MinWoodFolRatio}}$$
-
-$$\text{BudC} = \text{TotalC} - \text{WoodC}$$
-
-The annual maximum and minimum foliar mass are updated as:
-
-$$\text{FolMassMax} = \text{FolMass} + \frac{\text{BudC}}{\text{CFracBiomass}}$$
-
-$$\text{FolMassMin} = \text{FolMassMax} - \text{FolMassMax} \cdot \frac{1}{\text{FolReten}}$$
-
-The annual NEP is then:
-
-$$\text{NEP} = \text{TotPsn} - \text{WoodMRespYr} - \text{WoodGRespYr} - \text{FolGRespYr} - \text{SoilRespYr}$$
 
 ### PnET-CN only
 
@@ -214,3 +227,5 @@ where $\text{BudC}$ is the amount of carbon allocated to next year's foliar prod
 Then, the next year's foliar N concentration ($\text{FolNCon}$) is determined as:
 
 $$\text{FolNCon} = \frac{\text{FolMass} \cdot \text{FolNCon} / 100 + \text{BudN}}{\text{FolMass} + \text{BudC} / \textcolor{cyan}{\text{CFracBiomass}} \cdot 100}$$
+
+

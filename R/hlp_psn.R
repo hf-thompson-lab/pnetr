@@ -102,6 +102,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
     if (model == "pnet-cn") {
         DelAmax <- DWUE <- NULL
         CanopyDO3Pot <- NULL
+        CanopyNetPsnO3 <- 0
     }
 
 
@@ -154,10 +155,8 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             DWUE <- CO2Cond$DWUE
 
             # Calculate canopy ozone extinction based on folmass
+            # "a" in Ollinger et al 1997
             O3Prof <- 0.6163 + (0.00105 * share$vars$FolMass)
-
-            # Init some values
-            CanopyNetPsnO3 <- 0
         }
 
         GrossAmax <- share$glb$Amax_d + share$glb$BaseFolResp
@@ -198,15 +197,12 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             CanopyGrossPsn <- CanopyGrossPsn + LayerGrossPsn
 
             if (model == "pnet-cn") {
-                # Ozone effect on Net Psn
+                # Ozone effect on net photosynthesis (Ollinger et al 1997)
                 if (climate_dt$O3[rstep] > 0) {
                     # Convert netpsn to micromoles for calculating conductance
                     netPsnumol <- ((LayerNetPsn * 10^6) /
                         (Daylen * 12)) /
                         (avgMass / SLWLayer)
-                    # Calculate ozone extinction throughout the canopy
-                    RelLayer <- ix / nlayers
-                    RelO3 <- 1 - (RelLayer * O3Prof)^3
                     # % Calculate Conductance (mm/s): Conductance down-regulates
                     # with prior O3 effects on Psn
                     LayerG <- (CO2Cond$gsInt + (CO2Cond$gsSlope * netPsnumol)) *
@@ -217,13 +213,15 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
                         LayerG <- 0
                     }
 
+                    # Calculate ozone extinction throughout the canopy
+                    dD40i <- 1 - (ix / nlayers * O3Prof)^3
                     # Calculate cumulative ozone effect for each canopy layer
                     # with consideration that previous O3 effects were modified
                     # by drought
                     share$glb$O3Effect[ix] <- min(
                         1,
                         (share$glb$O3Effect[ix] * share$vars$DroughtO3Frac) +
-                            (0.0026 * LayerG * climate_dt$O3[rstep] * RelO3)
+                            (0.0026 * LayerG * climate_dt$O3[rstep] * dD40i)
                     )
                     LayerDO3 = 1 - share$glb$O3Effect[ix]
                 } else {
