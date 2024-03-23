@@ -1,5 +1,7 @@
 # PnET-R
 
+<img src="doc/pnetr_logo.png" align="right" height="138" />
+
 The R version of the Photosynthetic and EvapoTranspiration model family. 
 
 PnET is a simple lumped-parameter forest ecosystem model family designed to simulate the effects of climate change, disturbance, and biogeochemical perturbations on coupled C, H20, and N cycling. The PnET family consists of several models including [PnET-II](http://www.int-res.com/abstracts/cr/v05/n3/p207-222/), [PnET-Day](http://www.jstor.org/stable/4221255), [PnET-CN](https://linkinghub.elsevier.com/retrieve/pii/S0304380097019534), PnET-Daily, and PnET-SOM. Currently, in this package, we provide PnET-II, PnET-Day, and PnET-CN. 
