@@ -202,9 +202,6 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
                     netPsnumol <- ((LayerNetPsn * 10^6) /
                         (Daylen * 12)) /
                         (avgMass / SLWLayer)
-                    # Calculate ozone extinction throughout the canopy
-                    RelLayer <- ix / nlayers
-                    RelO3 <- 1 - (RelLayer * O3Prof)^3
                     # % Calculate Conductance (mm/s): Conductance down-regulates
                     # with prior O3 effects on Psn
                     LayerG <- (CO2Cond$gsInt + (CO2Cond$gsSlope * netPsnumol)) *
@@ -223,7 +220,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
                     share$glb$O3Effect[ix] <- min(
                         1,
                         (share$glb$O3Effect[ix] * share$vars$DroughtO3Frac) +
-                            (0.0026 * LayerG * climate_dt$O3[rstep] * RelO3)
+                            (0.0026 * LayerG * climate_dt$O3[rstep] * dD40i)
                     )
                     LayerDO3 = 1 - share$glb$O3Effect[ix]
                 } else {
