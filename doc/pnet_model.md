@@ -143,7 +143,7 @@ PnET-II includes all 6 modules sequentially ([AtmEnviron](/doc/atm_environ.md), 
 ![pnet-ii-model](/doc/pnet-ii_diagram.svg)
 
 
-![pnet-ii-model](/doc/pnet-ii-diagram.svg)
+![pnet-ii-model](/doc/pnet-ii_diagram.svg)
 
 
 ### PnET-CN
