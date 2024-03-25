@@ -85,11 +85,11 @@ Variables related to vegetation.
 
 ## Internal variables
 
-| Variable     | Description                                                             | Unit | Parameter | Processes |
-| ------------ | ----------------------------------------------------------------------- | ---- | --------- | --------- |
-| PosCBalMass  | #TODO: The foliar biomass needed to maintain a positive carbon balance. |      | Yes       |           |
-| DTemp        | #TODO:                                                                  |      | Yes       |           |
-| PotGrossAmax | #TODO:                                                                  |      | Yes       |           |
+| Variable     | Description                                                      | Unit                   | Processes |
+| ------------ | ---------------------------------------------------------------- | ---------------------- | --------- |
+| PosCBalMass  | The foliar biomass needed to maintain a positive carbon balance. | g m-2                  |           |
+| DTemp        | Temperature effect on                                            |                        |           |
+| PotGrossAmax | Potential gross instantenous maximum photosynthesis rate.        | n mol CO2 g-1 leaf s-1 |           |
 
 
 

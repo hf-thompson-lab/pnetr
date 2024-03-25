@@ -41,3 +41,16 @@ The `tests` folder contains scripts that are used for unit tests by the `testtha
 ## Developer Notes
 
 Developer notes can be found [here](/doc/developer_notes.md), which provide more detailed information about how to code the repository.
+
+
+## References
+
+- Aber, J. D., Driscoll, C., Federer, C. A., Lathrop, R., Lovett, G., Melillo, J. M., Steudler, P., & Vogelmann, J. (1993). A strategy for the regional analysis of the effects of physical and chemical climate change on biogeochemical cycles in northeastern (U.S.) forests. Ecological Modelling, 67(1), 37–47. https://doi.org/10.1016/0304-3800(93)90098-D
+- Aber, J. D., & Federer, C. A. (1992). A generalized, lumped-parameter model of photosynthesis, evapotranspiration and net primary production in temperate and boreal forest ecosystems. Oecologia, 92(4), 463–474. https://doi.org/10.1007/BF00317837
+- Aber, J. D., Ollinger, S. V., & Driscoll, C. T. (1997). Modeling nitrogen saturation in forest ecosystems in response to land use and atmospheric deposition. Ecological Modelling, 101(1), 61–78. https://doi.org/10.1016/S0304-3800(97)01953-4
+- Aber, J. D., Reich, P. B., & Goulden, M. L. (1996). Extrapolating Leaf CO₂ Exchange to the Canopy: A Generalized Model of Forest Photosynthesis Compared with Measurements by Eddy Correlation. Oecologia, 106(2), 257–265.
+- Aber, J., Ollinger, S., Federer, C., Reich, P., Goulden, M., Kicklighter, D., Melillo, J., & Lathrop, R. (1995). Predicting the effects of climate change on water yield and forest production in the northeastern United States. Climate Research, 5, 207–222. https://doi.org/10.3354/cr005207
+- De Bruijn, A., Gustafson, E. J., Sturtevant, B. R., Foster, J. R., Miranda, B. R., Lichti, N. I., & Jacobs, D. F. (2014). Toward more robust projections of forest landscape dynamics under novel environmental conditions: Embedding PnET within LANDIS-II. Ecological Modelling, 287, 44–57. https://doi.org/10.1016/j.ecolmodel.2014.05.004
+- Ollinger, S. V., Aber, J. D., & Reich, P. B. (1997). SIMULATING OZONE EFFECTS ON FOREST PRODUCTIVITY: INTERACTIONS AMONG LEAF-, CANOPY-, AND STAND-LEVEL PROCESSES. Ecological Applications, 7(4), 1237–1251. https://doi.org/10.1890/1051-0761(1997)007[1237:SOEOFP]2.0.CO;2
+- Ollinger, S. V., Aber, J. D., Reich, P. B., & Freuder, R. J. (2002). Interactive effects of nitrogen deposition, tropospheric ozone, elevated CO2 and land use history on the carbon dynamics of northern hardwood forests. Global Change Biology, 8(6), 545–562. https://doi.org/10.1046/j.1365-2486.2002.00482.x
+- Zhou, Z., Ollinger, S. V., & Lepine, L. (2018). Landscape variation in canopy nitrogen and carbon assimilation in a temperate mixed forest. Oecologia, 188(2), 595–606. https://doi.org/10.1007/s00442-018-4223-2
