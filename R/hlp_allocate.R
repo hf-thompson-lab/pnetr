@@ -83,14 +83,14 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     # Root C production
     # We first calculate a prorated root production for this month based on the
     # foliar production of this month. Then, we calculate the montly root C
-    # production. # TODO: comment incomplete.
-    TMult <- exp(0.1 * (Tavg - 7.1)) * 0.68
+    # production.
     RootCAdd <- vegpar$RootAllocA * (Dayspan / 365.0) + 
         vegpar$RootAllocB * share$vars$FolProdCMo
     
     # Available root carbon
     RootC <- share$vars$RootC + RootCAdd
-    # The amount of carbon that is allocated to root
+    # The amount of carbon that is allocated to root, depends on temeprature
+    TMult <- exp(0.1 * (Tavg - 7.1)) * 0.68
     RootAllocCMo <- min(1.0, ((1.0 / 12.0) * TMult)) * RootC
     
     # Update root carbon after allocation

@@ -82,7 +82,7 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
     # Check for disturbance year
     BiomLossFrac <- 0
     RemoveFrac <- 0
-    if (DOY > 335) {
+    if (DOY > 335 && length(sitepar$distyear) > 0) {
         for (i in 1:length(sitepar$distyear)) {
             if (climate_dt[rstep, Year] == sitepar$distyear[i]) {
                 BiomLossFrac <- sitepar$distintensity[i]
