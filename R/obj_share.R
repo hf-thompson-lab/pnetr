@@ -218,14 +218,16 @@ ShareVars <- R6::R6Class("ShareVars",
             NH4 = 0, # hardwired in place of user input NH4
             NO3 = 0, # hardwired in place of user input NO3
             NdepTot = 0,
+            # Humus mass, (g m^-2)
             HOM = 0,
+            # Humus N mass (g m^-2)
             HON = 0,
             RootNSinkEff = 0,
             WUEO3Eff = 0,
 
             # The following seems for PnET-Day
             # Dead wood maintenance respiration
-            DeadWoodM = 11300,
+            DeadWoodM = 0,
 
             WoodMassN = 0,
             DeadWoodN = 0

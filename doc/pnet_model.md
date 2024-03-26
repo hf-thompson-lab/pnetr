@@ -6,7 +6,7 @@ The PnET model family consists of several models including:
 
 - [The original PnET](https://doi.org/10.1007/BF00317837)
 - [PnET-Day](http://www.jstor.org/stable/4221255)
-- [PnET-II](https://doi.org/10.1007/BF00317837)
+- [PnET-II](http://www.int-res.com/abstracts/cr/v05/n3/p207-222)
 - [PnET-CN](https://linkinghub.elsevier.com/retrieve/pii/S0304380097019534)
 
 In this package, we currently provide PnET-II, PnET-Day, and PnET-CN. Note that the PnET-II model is actually an improved version of the original paper ([Aber et al 1995](https://doi.org/10.1007/BF00317837)), it also incorporates some parts of the PnET-Day model ([Aber et al 1996](http://www.jstor.org/stable/4221255)).
