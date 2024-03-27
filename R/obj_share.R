@@ -218,14 +218,16 @@ ShareVars <- R6::R6Class("ShareVars",
             NH4 = 0, # hardwired in place of user input NH4
             NO3 = 0, # hardwired in place of user input NO3
             NdepTot = 0,
+            # Humus mass, (g m^-2)
             HOM = 0,
+            # Humus N mass (g m^-2)
             HON = 0,
             RootNSinkEff = 0,
             WUEO3Eff = 0,
 
             # The following seems for PnET-Day
             # Dead wood maintenance respiration
-            DeadWoodM = 11300,
+            DeadWoodM = 0,
 
             WoodMassN = 0,
             DeadWoodN = 0
@@ -319,28 +321,31 @@ ShareVars <- R6::R6Class("ShareVars",
             )]
 
             # Monthly table
-            mon_dt <- self$logdt[, .(
+            sim_dt <- self$logdt[, .(
                 Year, Date, DOY, 
                 GrsPsnMo, NetPsnMo, NetCBal, VPD, FolMass, DWater, Drainage, ET
             )]
             
             return(list(
                 ann_dt = ann_dt,
-                mon_dt = mon_dt
+                sim_dt = sim_dt
             ))
         },
 
         # Format output for PnET-Day
         output_pnet_day = function() {
+            # Conver daily scale to monthly scale
+            self$logdt[, CanopyGrossPsn := CanopyGrossPsn * Dayspan]
+            self$logdt[, CanopyNetPsn := CanopyNetPsn * Dayspan]
             # Monthly table
-            # HACK: I don't think PnET-Day uses water stress, which is DWater
-            mon_dt <- self$logdt[, .(
+            sim_dt <- self$logdt[, .(
                 Year, Date, DOY,
-                CanopyGrossPsn, CanopyNetPsn, NetCBal, VPD, FolMass, DWater
+                GrsPsnMo = CanopyGrossPsn, NetPsnMo = CanopyNetPsn, 
+                NetCBal, VPD, FolMass
             )]
 
             return(list(
-                mon_dt = mon_dt
+                sim_dt = sim_dt
             ))
         },
 
@@ -367,7 +372,7 @@ ShareVars <- R6::R6Class("ShareVars",
             )]
 
             # Monthly table
-            mon_dt <- self$logdt[, .(
+            sim_dt <- self$logdt[, .(
                 Year, Date, DOY,
                 GrsPsnMo, NetPsnMo, NetCBal, VPD, FolMass, DWater, Drainage, ET,
                 PlantN
@@ -375,7 +380,7 @@ ShareVars <- R6::R6Class("ShareVars",
 
             return(list(
                 ann_dt = ann_dt,
-                mon_dt = mon_dt
+                sim_dt = sim_dt
             ))
         }
     )

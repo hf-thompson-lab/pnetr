@@ -29,7 +29,7 @@ CalDTemp <- function(Tday, Tmin, PsnTOpt, PsnTMin, GDDTot, GDDFolEnd, Dayspan) {
 # CO2 effect on photosynthesis. Introduced in PnET-CN
 CalCO2effectPsn <- function(Ca, vegpar) {
     # Leaf internal/external CO2
-    CiCaRatio <- (-0.075 * vegpar$FolNCon) + 0.875
+    CiCaRatio <- -0.075 * vegpar$FolNCon + 0.875
     # Ci at present (350 ppm) CO2
     Ci350 <- 350 * CiCaRatio
     # Ci at RealYear CO2 level
@@ -102,6 +102,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
     if (model == "pnet-cn") {
         DelAmax <- DWUE <- NULL
         CanopyDO3Pot <- NULL
+        CanopyNetPsnO3 <- 0
     }
 
 
@@ -154,10 +155,8 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             DWUE <- CO2Cond$DWUE
 
             # Calculate canopy ozone extinction based on folmass
+            # "a" in Ollinger et al 1997
             O3Prof <- 0.6163 + (0.00105 * share$vars$FolMass)
-
-            # Init some values
-            CanopyNetPsnO3 <- 0
         }
 
         GrossAmax <- share$glb$Amax_d + share$glb$BaseFolResp
@@ -169,7 +168,6 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         # Calculate photosynthsis by simulating canopy layers -----------------
 
         # Number of layers to simulate
-        Layer <- 0
         nlayers <- vegpar$IMAX
         # Average leaf mass per layer
         avgMass <- share$vars$FolMass / nlayers
@@ -187,7 +185,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
 
             # Gross layer psn w/o water stress
             LayerGrossPsnRate <- GrossAmax * LightEff
-            LayerGrossPsn <- LayerGrossPsnRate * (avgMass)
+            LayerGrossPsn <- LayerGrossPsnRate * avgMass
 
             # Net layer psn w/o water stress
             LayerResp <- (DayResp + NightResp) * avgMass
@@ -199,35 +197,33 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             CanopyGrossPsn <- CanopyGrossPsn + LayerGrossPsn
 
             if (model == "pnet-cn") {
-                # Ozone effect on Net Psn
+                # Ozone effect on net photosynthesis (Ollinger et al 1997)
                 if (climate_dt$O3[rstep] > 0) {
                     # Convert netpsn to micromoles for calculating conductance
                     netPsnumol <- ((LayerNetPsn * 10^6) /
                         (Daylen * 12)) /
-                        ((share$vars$FolMass / 50) / SLWLayer)
-                    # Calculate ozone extinction throughout the canopy
-                    Layer <- Layer + 1
-                    RelLayer <- Layer / 50
-                    RelO3 <- 1 - (RelLayer * O3Prof)^3
+                        (avgMass / SLWLayer)
                     # % Calculate Conductance (mm/s): Conductance down-regulates
                     # with prior O3 effects on Psn
                     LayerG <- (CO2Cond$gsInt + (CO2Cond$gsSlope * netPsnumol)) *
-                        (1 - share$glb$O3Effect[Layer])
+                        (1 - share$glb$O3Effect[ix])
                     # For no downregulation use:
                     # LayerG = gsInt + (gsSlope * netPsnumol);
                     if (LayerG < 0) {
                         LayerG <- 0
                     }
 
+                    # Calculate ozone extinction throughout the canopy
+                    dD40i <- 1 - (ix / nlayers * O3Prof)^3
                     # Calculate cumulative ozone effect for each canopy layer
                     # with consideration that previous O3 effects were modified
                     # by drought
-                    share$glb$O3Effect[Layer] <- min(
+                    share$glb$O3Effect[ix] <- min(
                         1,
-                        (share$glb$O3Effect[Layer] * share$vars$DroughtO3Frac) +
-                            (0.0026 * LayerG * climate_dt$O3[rstep] * RelO3)
+                        (share$glb$O3Effect[ix] * share$vars$DroughtO3Frac) +
+                            (0.0026 * LayerG * climate_dt$O3[rstep] * dD40i)
                     )
-                    LayerDO3 = 1 - share$glb$O3Effect[Layer]
+                    LayerDO3 = 1 - share$glb$O3Effect[ix]
                 } else {
                     LayerDO3 = 1
                 }

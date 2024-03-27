@@ -7,7 +7,7 @@ test_that("Match PnET-II w/ MATLAB result", {
     climate_dt <- fread("testdata/climate_data.csv")
 
     out <- PnET_II(climate_dt, sitepar, vegpar, verbose = TRUE)
-    mon_dt <- out$mon_dt
+    mon_dt <- out$sim_dt
     ann_dt <- out$ann_dt
 
     # Compare with their MATLAB result
