@@ -67,9 +67,9 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
             LAI <- share$vars$LAI * (FolMassNew / share$vars$FolMass)
             # I use the following instead of "<" here to avoid decimal error in
             # comparison due to the floating precision issues.
-            # if (FolMassNew - share$vars$FolMass > 1e-5) {
-            #     stop("should not be here!")
-            # }
+            if (FolMassNew - share$vars$FolMass > 1e-5) {
+                stop("should not be here!")
+            }
 
             # Calculate litter mass
             if (FolMassNew < share$vars$FolMass) {
