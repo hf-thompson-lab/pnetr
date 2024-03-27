@@ -34,6 +34,24 @@ CalSnowMelt <- function(SnowPack, Tavg, Dayspan) {
     return(snow_melt)
 }
 
+# Calculate snow fractiona and snow melt at daily time scale
+CalSnowFracMeltDaily <- function(Tavg, Tmin, pot_snow_pack) {
+    SnowTCrit <- -6
+    snow_melt <- 0
+
+    if (Tavg < 1) {
+        Tavg <- 1
+    }
+    if (Tmin > SnowTCrit) {
+        snow_frac <- 0
+        snow_melt <- 0.15 * Tavg
+    } else {
+        snow_frac <- 1
+    }
+
+    return(list(snow_frac = snow_frac, snow_melt = snow_melt))
+}
+
 #' The Water Balance module
 #' 
 #' @description
@@ -80,6 +98,7 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
 
     # Some already caculated variables at this time step
     Tavg <- share$logdt[rstep, Tavg]
+    Tmin <- share$logdt[rstep, Tmin]
     Dayspan <- share$logdt[rstep, Dayspan]
     VPD <- share$logdt[rstep, VPD]
     DayResp <- share$logdt[rstep, DayResp]
@@ -93,12 +112,29 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     # Remaining precipitation
     precrem <- prec - Evap
 
-    # Snow fraction
-    SnowFrac <- CalSnowFraction(Tavg)
-    # Potential snow pack
-    pot_snow_pack <- sitepar$SnowPack + precrem * SnowFrac
-    # Snow melt
-    SnowMelt <- CalSnowMelt(pot_snow_pack, Tavg, Dayspan)
+    if (Dayspan > 1) {
+        # Snow fraction
+        SnowFrac <- CalSnowFraction(Tavg)
+        # Potential snow pack
+        pot_snow_pack <- sitepar$SnowPack + precrem * SnowFrac
+        # Snow melt
+        SnowMelt <- CalSnowMelt(pot_snow_pack, Tavg, Dayspan)
+    } else {
+        SnowFracMelt <- CalSnowFracMeltDaily(Tavg, Tmin)
+        # Snow fraction
+        SnowFrac <- SnowFracMelt$snow_frac
+        # Potential snow pack
+        pot_snow_pack <- sitepar$SnowPack + precrem * SnowFrac
+        # Snow melt
+        SnowMelt <- SnowFracMelt$snow_melt
+        if (pot_snow_pack > 0) {
+            if (SnowMelt > pot_snow_pack) {
+                SnowMelt <- pot_snow_pack
+            }
+        } else {
+            SnowMelt <- 0
+        }
+    }
     # Actual snow pack
     sitepar$SnowPack <- pot_snow_pack - SnowMelt
 

@@ -321,28 +321,31 @@ ShareVars <- R6::R6Class("ShareVars",
             )]
 
             # Monthly table
-            mon_dt <- self$logdt[, .(
+            sim_dt <- self$logdt[, .(
                 Year, Date, DOY, 
                 GrsPsnMo, NetPsnMo, NetCBal, VPD, FolMass, DWater, Drainage, ET
             )]
             
             return(list(
                 ann_dt = ann_dt,
-                mon_dt = mon_dt
+                sim_dt = sim_dt
             ))
         },
 
         # Format output for PnET-Day
         output_pnet_day = function() {
+            # Conver daily scale to monthly scale
+            self$logdt[, CanopyGrossPsn := CanopyGrossPsn * Dayspan]
+            self$logdt[, CanopyNetPsn := CanopyNetPsn * Dayspan]
             # Monthly table
-            # HACK: I don't think PnET-Day uses water stress, which is DWater
-            mon_dt <- self$logdt[, .(
+            sim_dt <- self$logdt[, .(
                 Year, Date, DOY,
-                CanopyGrossPsn, CanopyNetPsn, NetCBal, VPD, FolMass, DWater
+                GrsPsnMo = CanopyGrossPsn, NetPsnMo = CanopyNetPsn, 
+                NetCBal, VPD, FolMass
             )]
 
             return(list(
-                mon_dt = mon_dt
+                sim_dt = sim_dt
             ))
         },
 
@@ -369,7 +372,7 @@ ShareVars <- R6::R6Class("ShareVars",
             )]
 
             # Monthly table
-            mon_dt <- self$logdt[, .(
+            sim_dt <- self$logdt[, .(
                 Year, Date, DOY,
                 GrsPsnMo, NetPsnMo, NetCBal, VPD, FolMass, DWater, Drainage, ET,
                 PlantN
@@ -377,7 +380,7 @@ ShareVars <- R6::R6Class("ShareVars",
 
             return(list(
                 ann_dt = ann_dt,
-                mon_dt = mon_dt
+                sim_dt = sim_dt
             ))
         }
     )
