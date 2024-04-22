@@ -11,7 +11,7 @@ PnET is a simple lumped-parameter forest ecosystem model family designed to simu
 The package can be installed by running the following command in R terminal:
 
 ```
-install.github("https://github.com/hf-thompson-lab/pnetr")
+install.github("hf-thompson-lab/pnetr")
 ```
 
 We encourage users folk/download this repository and modify the any part of the scripts for their needs. For example, we often read science papers claiming:"earth system models do not capture or underestimate xxx processes/effects" but most earth system models are hard to modify because they are coded in low-level programming languages for computational reasons and they are too complex to handle for most scientists who only wants to test their scientific hypotheses/findings. In this case, users can modify the corresponding processes in this pacakge and test their hypothses directly. Also for this reason, we provided detailed documentation for the encoded processes in this pacakge for user's references. 
