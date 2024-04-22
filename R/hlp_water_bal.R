@@ -150,10 +150,9 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     # Transpiration
     # Potential transpiration
     CanopyGrossPsnMG <- share$vars$CanopyGrossPsn * 1000 * 44 / 12
-    # TODO: this thing can be calculated at once globally
+    # HACK: this thing can be calculated at once globally
     WUE <- vegpar$WUEconst / VPD
-    # Potential transpiration
-    # TODO: why divide by 10000?
+    # Potential transpiration; convert units
     PotTransd <- CanopyGrossPsnMG / WUE / 10000
     Trans <- 0
     if (PotTransd > 0) {
@@ -178,7 +177,7 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
         DWater <- Trans / (PotTransd * Dayspan)
         # Annual water stress
         DWatertot <- share$vars$DWatertot + (DWater * Dayspan)
-        # TODO: Annual xxx
+        # Annual accumulated days till now
         DWaterIx <- share$vars$DWaterIx + Dayspan
     } else {
         DWater <- 1

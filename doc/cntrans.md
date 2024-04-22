@@ -2,8 +2,8 @@
 
 This routine calculates litterfall and transfers to soil organic matter (SOM). Here are the variables involved (See [variables_table](/doc/paramters_table.md) for description).
 
-- $\text{HOM}$
-- $\text{HON}$
+- $\text{HOM}$: Humus mass.
+- $\text{HON}$: Humus N mass.
 - $\text{RootMass}$: Root biomass.
 - $\text{RootMassN}$: Nitrogen in root biomass.
 - $\text{WoodMass}$: Wood biomass.
@@ -52,8 +52,7 @@ $$\text{RootMassN} = \text{RootMassN} - \text{RootLitN}$$
 
 ## Wood turnover
 
-#TODO:
-Woody litter production:
+Woody litter production is determined by wood mass and a wood turnover fraction:
 
 $$\text{WoodLitM} = \text{WoodMass} \cdot \textcolor{cyan}{\text{WoodTurnover}}$$
 

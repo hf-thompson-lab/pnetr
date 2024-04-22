@@ -93,7 +93,6 @@ This month's added root carbon is calculated as a linear function of $\text{FolP
 
 $$\text{RootCAdd}^m = \textcolor{cyan}{\text{RootAllocA}} \cdot (\text{Dayspan}^m / 365.0) + \textcolor{cyan}{\text{RootAllocB}} \cdot \text{FolProdC}^m$$
 
-<!-- TODO: this part is a bit confusing. -->
 Then, this month's accumulated root carbon is:
 
 $$\text{RootC}^m = \text{RootC}^{m-1} + \text{RootCAdd}^m$$

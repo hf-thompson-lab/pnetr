@@ -5,17 +5,17 @@ This routine calculates C and N mineralization and nitrification and also matche
 - $\text{NO3}$: Nitrogen deposition in NO3.
 - $\text{NH4}$: Nitrogen deposition in NH4.
 - $\text{NdepTot}$: Total amount of nitrogen deposition.
-- $\text{HOM}$: 
-- $\text{HON}$:
+- $\text{HOM}$: Humus mass.
+- $\text{HON}$: Humus N mass.
 - $\text{SoilDecResp}$: Soil decompostion respiration.
-- $\text{SoilDecRespYr}$: The annual accumulated soil decomposition respiration.
-- $\text{GrossNMinYr}$: The annual accumulated gross N mineralization
+- $\text{SoilDecRespYr}$: Annual accumulated soil decomposition respiration.
+- $\text{GrossNMinYr}$: Annual accumulated gross N mineralization
 - $\text{NetCBal}$: Net carbon balance.
-- $\text{GrossNImmobYr}$: The annual accumulated gross N immobilization
-- $\text{NetNMinYr}$: 
-- $\text{NetNitrYr}$:
+- $\text{GrossNImmobYr}$: Annual accumulated gross N immobilization
+- $\text{NetNMinYr}$: Annual net N mineralization.
+- $\text{NetNitrYr}$: Annual net nitrification.
 - $\text{PlantN}$: Plant N pool.
-- $\text{PlantNUptakeYr}$: The annual accumulated plant N uptake.
+- $\text{PlantNUptakeYr}$: Annual accumulated plant N uptake.
 
 
 ## Atmospheric N deposition

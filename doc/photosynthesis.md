@@ -7,9 +7,9 @@ This routine estimates photosynthesis **without water stress**. Here are the var
 - $\text{LAI}$: Leaf area index.
 - $\text{CanopyNetPsn}$: Canopy-level net photosynthesis.
 - $\text{CanopyGrossPsn}$: Canopy-level gross photosynthesis.
-- $\text{PosCBalMass}$: 
-- $\text{PosCBalMassTot}$: 
-- $\text{PosCBalMassIx}$:
+- $\text{PosCBalMass}$: Mass needed to maintain a positive C balance.
+- $\text{PosCBalMassTot}$: Annual total amount of mass needed to maintain a positive C balance.
+- $\text{PosCBalMassIx}$: The annual accumulated days till current time step for PosCBalMass.
 - $\text{LightEffMin}$: Minimum light effect on photosynthesis.
 
 And, for PnET-CN, these variables are also involved:
