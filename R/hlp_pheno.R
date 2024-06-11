@@ -35,7 +35,7 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
 
     if (phenophase == "grow") {
         # Within growing season but before senescence
-        if (GDDTot > vegpar$GDDFolStart && DOY < vegpar$SenescStart) {
+        if (GDDTot > vegpar$GDDFolStart && DOY <= vegpar$SenescStart) {
             # GDD effect on foliage
             GDDFolEff <- (GDDTot - vegpar$GDDFolStart) / 
                 (vegpar$GDDFolEnd - vegpar$GDDFolStart)
