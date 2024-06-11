@@ -82,7 +82,7 @@ ShareVars <- R6::R6Class("ShareVars",
             DWater = 0,
             # Annual accumulated DWater effect
             DWatertot = 0,
-            # TODO: what is this? (days)
+            # Annual accumulated days till the current time step
             DWaterIx = 0,
             
             # Drainage rate (cm)
@@ -143,7 +143,7 @@ ShareVars <- R6::R6Class("ShareVars",
             PosCBalMass = 0,
             # Annual positive carbon balance mass (g C m^-2)
             PosCBalMassTot = 0,
-            # TODO: Annual xxx
+            # Annual accumulated days till the current time step
             PosCBalMassIx = 0,
 
             # Wood -----------------
@@ -306,32 +306,6 @@ ShareVars <- R6::R6Class("ShareVars",
             set(self$logdt, as.integer(i), varnames, vals)
         },
 
-        # Format output for PnET-II
-        output_pnet_ii = function() {
-            # Annual table
-            ann_dt <- self$logdt[month(Date) == 12, .(
-                Year, 
-                # Photosynthesis
-                NPPFolYr, NPPWoodYr, NPPRootYr, NEP, TotGrossPsn,
-                TotPrec, DWater, TotTrans, TotPsn, TotDrain, TotEvap, ET, 
-                # Carbon cycle
-                PlantC, BudC, WoodC, RootC, 
-                FolMass, DeadWoodM, WoodMass, RootMass, 
-                TotalLitterMYr, RootMRespYr, RootGRespYr
-            )]
-
-            # Monthly table
-            sim_dt <- self$logdt[, .(
-                Year, Date, DOY, 
-                GrsPsnMo, NetPsnMo, NetCBal, VPD, FolMass, DWater, Drainage, ET
-            )]
-            
-            return(list(
-                ann_dt = ann_dt,
-                sim_dt = sim_dt
-            ))
-        },
-
         # Format output for PnET-Day
         output_pnet_day = function() {
             # Conver daily scale to monthly scale
@@ -345,14 +319,44 @@ ShareVars <- R6::R6Class("ShareVars",
             )]
 
             return(list(
-                sim_dt = sim_dt
+                sim_dt = sim_dt,
+                log_dt = self$logdt
+            ))
+        },
+
+        # Format output for PnET-II
+        output_pnet_ii = function() {
+            # Annual table
+            ann_dt <- self$logdt[, .SD[.N], by = Year][, .(
+                Year, 
+                # Photosynthesis
+                NPPFolYr, NPPWoodYr, NPPRootYr, NEP, TotGrossPsn,
+                TotPrec, DWater, TotTrans, TotPsn, TotDrain, TotEvap, ET, 
+                # Carbon cycle
+                PlantC, BudC, WoodC, RootC, 
+                FolMass, DeadWoodM, WoodMass, RootMass, 
+                TotalLitterMYr, RootMRespYr, RootGRespYr,
+                SoilRespYr
+            )]
+
+            # Monthly table
+            sim_dt <- self$logdt[, .(
+                Year, Date, DOY, VPD,
+                GrsPsnMo, NetPsnMo, NetCBal, FolMass, SoilRespMo, 
+                DWater, Drainage, ET
+            )]
+            
+            return(list(
+                ann_dt = ann_dt,
+                sim_dt = sim_dt,
+                log_dt = self$logdt
             ))
         },
 
         # Format output for PnET-CN
         output_pnet_cn = function() {
             # Annual table
-            ann_dt <- self$logdt[month(Date) == 12, .(
+            ann_dt <- self$logdt[, .SD[.N], by = Year][, .(
                 Year,
                 # Photosynthesis
                 NPPFolYr, NPPWoodYr, NPPRootYr, NEP, TotGrossPsn,
@@ -373,14 +377,16 @@ ShareVars <- R6::R6Class("ShareVars",
 
             # Monthly table
             sim_dt <- self$logdt[, .(
-                Year, Date, DOY,
-                GrsPsnMo, NetPsnMo, NetCBal, VPD, FolMass, DWater, Drainage, ET,
+                Year, Date, DOY, VPD,
+                GrsPsnMo, NetPsnMo, NetCBal, FolMass, SoilRespMo,
+                DWater, Drainage, ET,
                 PlantN
             )]
 
             return(list(
                 ann_dt = ann_dt,
-                sim_dt = sim_dt
+                sim_dt = sim_dt,
+                log_dt = self$logdt
             ))
         }
     )

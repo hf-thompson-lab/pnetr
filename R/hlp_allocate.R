@@ -304,6 +304,9 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         # Foliar 
         folnconnew <- (share$vars$FolMass * (vegpar$FolNCon / 100) + BudN) /
             (share$vars$FolMass + (BudC / vegpar$CFracBiomass)) * 100
+        if (is.na(folnconnew)) {
+            folnconnew <- 0
+        }
         # HACK: I don't quite like this b/c it changes the input value
         vegpar$FolNCon <- folnconnew
 

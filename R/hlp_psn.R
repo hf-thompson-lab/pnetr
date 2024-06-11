@@ -166,7 +166,6 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         )
 
         # Calculate photosynthsis by simulating canopy layers -----------------
-
         # Number of layers to simulate
         nlayers <- vegpar$IMAX
         # Average leaf mass per layer

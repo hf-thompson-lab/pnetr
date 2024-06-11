@@ -149,8 +149,8 @@ The accumulated $\text{DWater}$ is:
 
 $$\text{DWatertot} = \Sigma_{i=1}^{t} (\text{DWater}^i \cdot \text{Dayspan}^i)$$
 
-<!-- #HACK: what is this? -->
-$$\text{DWaterIx} = \Sigma_{i=1}^{12} \text{Dayspan}^m$$
+
+<!-- $$\text{DWaterIx} = \Sigma_{i=1}^{12} \text{Dayspan}^m$$ -->
 
 
 ## Water stress on photosynthesis
