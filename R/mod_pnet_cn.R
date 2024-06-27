@@ -25,7 +25,9 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     share <- ShareVars$new(climate_dt, vegpar)
 
     # These parameters can be calculated at once, can save some computing time
-    AtmEnviron(climate_dt, sitepar$Lat, share$logdt)
+    # Assigning the data.table will result in copying data, but passing by
+    # reference seems not working for Windows machines!
+    share$logdt <- AtmEnviron(climate_dt, sitepar$Lat, share$logdt)
 
     # Realized daytime respiration
     share$logdt[, DayResp := CalRealizedResp(
