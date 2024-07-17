@@ -50,10 +50,6 @@ Colors are used to distinguish different variable types:
 
 The following are the major modules encoded in the PnET model framework:
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> fb68df9 (Update doc)
 - **[AtmEnviron](/doc/atm_environ.md)**: atmospheric environmental variables.
 - **[Phenology](/doc/phenology.md)**: controls growing season timing and length, mainly consists of start of leaf development (start-of-season, SOS), start of woody growth, leaf senescence, and leaf fully fall (end-of-season, EOS).
 - **[Photosynthesis](/doc/photosynthesis.md)**: determines carbon productivity, respiration, and leaf development.
@@ -63,59 +59,13 @@ The following are the major modules encoded in the PnET model framework:
 - **[CNTrans](/doc/cntrans.md)**: calculates litterfall and transfers to soil organic matter.
 - **[Decomp](/doc/decomp.md)**: calculates C and N mineralization and nitrification and also matches N availability with plant N demand to determine N uptake. In the code scripts, the NUptake routine in Aber et al 1997, which combines N availability with the strength of plant demand to determine the uptake of N into the PlantN pool, is also included in this module.
 - **[Leach](/doc/leach.md)**: calculates leaching losses of nitrate.
-<<<<<<< HEAD
 
 Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/atm_environ.md)**, which is the same across all models.
-=======
-- **[AtmEnviron](/doc/AtmEnviron.md)**: atmospheric environmental variables.
-- **[Phenology](/doc/Phenology.md)**: controls growing season timing and length, mainly consists of start of leaf development (start-of-season, SOS), start of woody growth, leaf senescence, and leaf fully fall (end-of-season, EOS).
-- **[Photosynthesis](/doc/Photosynthesis.md)**: determines carbon productivity, respiration, and leaf development.
-- **[Water Balance](/doc/Water%20Balance.md)**: controls water cycling and impacts of water availability on photosynthesis.
-- **[Soil Respiration](/doc/Soil%20Respiration.md)**: carbon reparation in soil.
-- **[Allocation](/doc/Allocation.md)**: allocates monthly and annual carbon gain for growth and respiration.
-- **[CNTrans](/doc/CNTrans.md)**: calculates litterfall and transfers to soil organic matter.
-- **[Decomp](/doc/Decomp.md)**: calculates C and N mineralization and nitrification and also matches N availability with plant N demand to determine N uptake. In the code scripts, the NUptake routine in Aber et al 1997, which combines N availability with the strength of plant demand to determine the uptake of N into the PlantN pool, is also included in this module.
-- **[Leach](/doc/Leach.md)**: calculates leaching losses of nitrate.
 
-Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/AtmEnviron.md)**, which is the same across all models.
->>>>>>> e8ceb20 (More documentation)
-=======
-
-Different models include different modules above and may adapt particular parts, except for **[AtmEnviron](/doc/atm_environ.md)**, which is the same across all models.
->>>>>>> fb68df9 (Update doc)
 
 ### PnET-Day
 
 PnET-Day is the simplest model in this family, it only simulates [Photosynthesis](/doc/photosynthesis.md). So, this model only includes [AtmEnviron](/doc/atm_environ.md), [Phenology](/doc/phenology.md), and [Photosynthesis](/doc/photosynthesis.md).
-<<<<<<< HEAD
-
-```mermaid
-flowchart TD
-
-foln[Foliar N Concentration] --> Amax
-Amax --> maxGPP[Max Gross Photosynthesis]
-maxGPP --- env{{+ Foliar mass \n + Radiation \n + VPD \n + Temperature}}
-env --> realGPP[Realized Gross Photosynthesis]
-
-Amax --> basalResp[Basal Respiration]
-basalResp --- env2{{+ Temperature}}
-env2 --> realResp[Realized Respiration]
-```
-=======
->>>>>>> fb68df9 (Update doc)
-
-```mermaid
-flowchart TD
-
-foln[Foliar N Concentration] --> Amax
-Amax --> maxGPP[Max Gross Photosynthesis]
-maxGPP --- env{{+ Foliar mass \n + Radiation \n + VPD \n + Temperature}}
-env --> realGPP[Realized Gross Photosynthesis]
-
-Amax --> basalResp[Basal Respiration]
-basalResp --- env2{{+ Temperature}}
-env2 --> realResp[Realized Respiration]
-```
 
 ```mermaid
 flowchart TD
@@ -133,37 +83,16 @@ env2 --> realResp[Realized Respiration]
 ### PnET-II
 
 PnET-II includes all 6 modules sequentially ([AtmEnviron](/doc/atm_environ.md), [Phenology](/doc/phenology.md), [Photosynthesis](/doc/photosynthesis.md), [Water Balance](/doc/water_balance.md), [Soil Respiration](/doc/soil_respiration.md), [Allocation](/doc/allocation.md)). 
-<<<<<<< HEAD
-
-![pnet-ii-model](/doc/pnet-ii_diagram.svg)
-
-=======
->>>>>>> fb68df9 (Update doc)
-
-![pnet-ii-model](/doc/pnet-ii_diagram.svg)
-
 
 ![pnet-ii-model](/doc/pnet-ii_diagram.svg)
 
 
 ### PnET-CN
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-PnET-CN builds upon PnET-II and includes nitrogen cycling. It introduces [CNTrans](/doc/cntrans.md), [Decomp](/doc/decomp.md), [Leach](/doc/leach.md) modules and modifies the [Allocation](/doc/allocation.md) module.
-=======
 PnET-CN builds upon PnET-II and includes nitrogen cycling. It introduces [CNTrans](/doc/CNTrans.md), [Decomp](/doc/Decomp.md), [Leach](/doc/Leach.md) modules and modifies the [Allocation](/doc/Allocation.md) module.
 
-![pnet-cn-model](/doc/pnet-cn-diagram.svg)
+![pnet-cn-model](/doc/pnet-cn_diagram.svg)
 
 ### PnET-Daily
 
 PnET-Daily is a daily scale model while other models in the family are monthly scale.
-
-### PnET-SOM
->>>>>>> e8ceb20 (More documentation)
-=======
-PnET-CN builds upon PnET-II and includes nitrogen cycling. It introduces [CNTrans](/doc/cntrans.md), [Decomp](/doc/decomp.md), [Leach](/doc/leach.md) modules and modifies the [Allocation](/doc/allocation.md) module.
->>>>>>> fb68df9 (Update doc)
-
-![pnet-cn-model](/doc/pnet-cn_diagram.svg)
