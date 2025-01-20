@@ -17,9 +17,6 @@ ReadCData <- function(testfilename) {
         strsplit("\\s{2,}") %>%
         unlist() %>%
         .[1]
-    # Since the climate filename in the example input.txt is on a Windows system and
-    # it is a fixed path, here I'm reading it directly
-    climate_filename <- "/Users/xiaojiegao/Documents/Git/PnET-R/PNET_C1/Input/climate.clim"
 
     clim_dt <- fread(climate_filename)
 
