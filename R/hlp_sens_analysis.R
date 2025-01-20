@@ -400,5 +400,5 @@ DoSens <- function(clim_dt, sitepar, vegpar, model,
         target_pars = target_pars,
         annual = annual
     )
-    VisSense(vegpar_samp_mat, sens_res_dt, outfile = "zzz.pdf")
+    VisSense(vegpar_samp_mat, sens_res_dt, outfile = outfile)
 }
