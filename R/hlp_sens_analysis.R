@@ -403,7 +403,3 @@ DoSens <- function(clim_dt, sitepar, vegpar, model,
     VisSense(vegpar_samp_mat, sens_res_dt, outfile = outfile)
 }
 
-
-Test <- function(test) {
-    
-}
