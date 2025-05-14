@@ -33,6 +33,27 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
     GDDTot <- share$logdt[rstep, GDDTot]
     DOY <- share$logdt[rstep, DOY]
 
+    # --------------------------------------------------------------------------
+    #! Example of replacing phenology w/ observations
+
+    # theyr <- share$logdt[rstep, Year]
+    # gddstart <- blsp_thres_dt[Year == theyr, GDD]
+    # if (length(gddstart) != 0) {
+    #     vegpar$GDDFolStart <- gddstart
+    # }
+
+    # sens <- blsp_thres_dt[Year == theyr, sens]
+    # if (length(sens) != 0) {
+    #     vegpar$SenescStart <- sens
+    # }
+    # if (theyr >= 2001 & theyr <= 2022) { # MODIS pheno
+    #     vegpar$GDDFolStart <- gdds_dt[yr == theyr, gdds]
+    #     vegpar$SenescStart <- gdds_dt[yr == theyr, gse]
+    #     vegpar$GDDFolEnd <- gdds_dt[yr == theyr, gdd_folend]
+    # }
+    # --------------------------------------------------------------------------
+    
+
     if (phenophase == "grow") {
         # Within growing season but before senescence
         if (GDDTot > vegpar$GDDFolStart && DOY <= vegpar$SenescStart) {
