@@ -7,13 +7,9 @@
 
 Param <- R6::R6Class("Param",
 
-    public = list(
-        # Init the parameters using a csv file
-        initialize = function(csv_file = NULL) {
-            if (is.null(csv_file)) {
-                return(self)
-            }
-            
+    private = list(
+        # Use CSV file to init parameters
+        parse_csv = function(csv_file) {
             par_dt <- read.csv(csv_file)
             for (col_name in colnames(par_dt)) {
                 if (!is.null(self[[col_name]])) {
@@ -28,6 +24,31 @@ Param <- R6::R6Class("Param",
                     }
                 }
             }
+        },
+        
+        # Use json file to init parameters
+        parse_json = function(json_file) {
+            par_li <- jsonlite::read_json(json_file)
+            for (varname in names(par_li)) {
+                if (!is.null(self[[varname]])) {
+                    self[[varname]] <- unlist(par_li[[varname]])
+                }
+            }
+        }
+    ),
+
+    public = list(
+        # Init the parameters using a csv file
+        initialize = function(filename = NULL) {
+            if (is.null(filename)) {
+                return(self)
+            }
+
+            filetype <- tools::file_ext(filename)
+            switch(filetype,
+                "csv" = private$parse_csv(filename),
+                "json" = private$parse_json(filename)
+            )
         }
     )
 
