@@ -1,0 +1,135 @@
+
+#~ Photosynthesis variables ---------------------------------
+
+# Intercept of relationship between foliar N and max photosynthetic rate 
+# (n mol CO2 g^-1 leaf s^-1)
+AmaxA: -46
+# Slope of relationship between foliar N and max photosynthetic rate
+# (n mol CO2 g^-1 leaf s^-1)
+AmaxB: 71.9
+# Respiration as a fraction of maximum photosynthesis (%)
+BaseFolRespFrac: 0.1
+# Half saturation light level (umol CO2 m^-2 leaf s^-1)
+HalfSat: 200
+# Daily Amax as a fraction of early morning instantaneous rate
+AmaxFrac: 0.75
+# Minimum temperature for photosynthesis (°C)
+PsnTMin: 4
+# Optimum temperature for photosynthesis (°C)
+PsnTOpt: 24
+# Q10 value for foliar respiration
+RespQ10: 2
+
+
+#~ Canopy variables ----------------------------------------
+
+# Canopy light attenuation constant (unitless)
+k: 0.58
+# Foliar nitrogen (% by weight; 100 g N g^-1 dm)
+FolNCon: 2
+# Site-specific max summer foliar mass (g m^-2)
+FolMassMax: 300
+# Site-specific min winter foliar mass (g m^-2)
+FolMassMin: 0
+# Foliage retention time (yr)
+FolReten: 1
+# Top sunlit canopy specific leaf weight (g m^-2)
+SLWmax: 100
+# Change in SLW with increasing foliar mass above (g m^-2 g^-1)
+SLWdel: 0.2
+# Maximum relative growth rate for foliage (% yr^-1)
+FolRelGrowMax: 0.95
+# Growing-degree-days at which foliar production begins (degree)
+GDDFolStart: 100
+# Senescence start DOY (day of yr)
+SenescStart: 270
+# Growing-degree-days at which foliar production ends (degree)
+GDDFolEnd: 900
+# Growing-degree-days at which wood production begins (degree)
+GDDWoodStart: 900
+# Growing-degree-days at which wood production ends (degree)
+GDDWoodEnd: 1600
+
+
+#~ Water balance variables ----------------------------------------
+
+# Coefficients for converting VPD to DVPD (kPa^-1)
+DVPD1: 0.05
+# Coefficients for converting VPD to DVPD (kPa^-1)
+DVPD2: 2
+# Fraction of precipitation intercepted and evaporated
+PrecIntFrac: 0.11
+# Constant in equation for water use efficiency as a function of VPD
+WUEConst: 10.9
+# Fraction of water inputs lost directly to drainage
+FastFlowFrac: 0.1
+# Soil water release parameter
+f: 0.04
+# Soil moisture effect on water stress
+SoilMoistFact: 0
+
+
+#~ Carbon allocation variables ----------------------------------------
+
+# Carbon as fraction of foliage mass
+CFracBiomass: 0.45
+# Intercept of relationship between foliar and root allocation
+RootAllocA: 0
+# Slope of relationship between foliar and root allocation
+RootAllocB: 2
+# Growth respiration, fraction of allocation
+GRespFrac: 0.25
+# Ratio of fine root maintenance respiration to biomass production
+RootMRespFrac: 1
+# Wood maintenance respiration as a fraction of gross photosynthesis
+WoodMRespA: 0.07
+# Fraction of PlantC held in reserve after allocation to BudC
+PlantCReserveFrac: 0.75
+# Minimum ratio of carbon allocation to wood and foliage
+MinWoodFolRatio: 1.5
+
+
+#~ Soil respiration variables ----------------------------------------
+
+# Intercept of relationship between mean montly temperature and soil respiration
+# (g C m^-2 mo^-1)
+SoilRespA: 27.46
+# Slope of relationship between mean montly temperature and soil respiration 
+#(g C m^-2 mo^-1)
+SoilRespB: 0.06844
+
+
+#~ N cycle for PnET-CN ----------------------------------------
+
+# Coefficients for fine root turnover (fraction * year^-1) as a function of
+# annual net N
+RootTurnoverA: 0.789
+RootTurnoverB: 0.191
+RootTurnoverC: 0.0211
+# Fractional mortality of live wood per year
+WoodTurnover: 0.025
+# Fractional transfer from dead wood to SOM per year
+WoodLitTrans: 0.1
+# Fractional loss of mass as CO2 in wood decomposition (%)
+WoodLitCLoss: 0.8
+# Fraction of dead wood loss to litter and decay, dead wood turnover 
+# (yr ^-1)
+WoodLitLossRate: 0.1
+# Max. N content in PlantN pool (g m^-2)
+MaxNStore: 20
+# Decomposition constant for SOM pool (year^-1)
+Kho: 0.07499
+# Coefficients for fraction of mineralized N reimmobilized as a function of
+# SOM C:N
+NImmobA: 151
+NImmobB: -35
+# Max. fractional increase in N concentrations
+FolNConRange: 0.6
+# Fraction of foliage N retransfer to plant N, remainder in litter (%)
+FolNRetrans: 0.5
+# Min N concentration in foliar litter (g N g^-1 dry matter)
+FLPctN: 0.009
+# Min. N concentration in root litter (%)
+RLPctN: 0.012
+# Min. N concentration in wood litter (%)
+WLPctN: 0.002
