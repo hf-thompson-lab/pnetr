@@ -34,6 +34,15 @@ Param <- R6::R6Class("Param",
                     self[[varname]] <- unlist(par_li[[varname]])
                 }
             }
+        },
+
+        parse_yaml = function(yaml_file) {
+            par_li <- yaml::read_yaml(yaml_file)
+            for (varname in names(par_li)) {
+                if (!is.null(self[[varname]])) {
+                    self[[varname]] <- unlist(par_li[[varname]])
+                }
+            }
         }
     ),
 
@@ -47,7 +56,9 @@ Param <- R6::R6Class("Param",
             filetype <- tools::file_ext(filename)
             switch(filetype,
                 "csv" = private$parse_csv(filename),
-                "json" = private$parse_json(filename)
+                "json" = private$parse_json(filename),
+                "yaml" = private$parse_yaml(filename),
+                warning("Invalid file type!")
             )
         }
     )
