@@ -1,0 +1,55 @@
+{
+    // Water holding capacity, plant available water (cm)
+    "WHC": 12,
+    // Latitude (degrees)
+    "Lat": 42.5,
+    // Site water stress on photosynthesis. 0 or 1, with 1 stands for water stress
+    "WaterStress": 1,
+    // Initial snow pack on the first month (day) of simulation (cm)
+    "SnowPack": 13,
+    // If there is an effect of CO2 on conductance which affects WUE and O3
+    // impairment. 1: Yes; 0: NO;
+    "CO2gsEffect": 1,
+    
+    //~ Disturbance -----------------
+    // Agriculture start year
+    "agstart": 0,
+    // Agriculture end year
+    "agstop": 0,
+    // Removal fraction in agriculture
+    "agrem": 0,
+    
+    //~ The following has not been fully implemented yet ---------
+    // Disturbance years
+    "distyear": [
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    // Disturbance intensity. 0-1.
+    "distintensity": [
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    // Disturbance removal fraction of aboveground biomass
+    "distremove": [
+        0,
+        0,
+        0,
+        0,
+        0
+    ],
+    // Disturbance soil loss
+    "distsoilloss": [
+        0,
+        0,
+        0,
+        0,
+        0
+    ]
+}
