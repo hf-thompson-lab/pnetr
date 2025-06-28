@@ -7,8 +7,11 @@ The R version of the Photosynthetic and EvapoTranspiration model family.
 PnET is a simple lumped-parameter forest ecosystem model family designed to simulate the effects of climate change, disturbance, and biogeochemical perturbations on coupled C, H20, and N cycling. The PnET family consists of several models including [PnET-II](http://www.int-res.com/abstracts/cr/v05/n3/p207-222/), [PnET-Day](http://www.jstor.org/stable/4221255), [PnET-CN](https://linkinghub.elsevier.com/retrieve/pii/S0304380097019534), PnET-Daily, and PnET-SOM. Currently, in this package, we provide PnET-II, PnET-Day, and PnET-CN. 
 
 > [!Tip]
+> This package is published in Methods in Ecology & Evolution! 
+> 
 > Please cite: 
-> Gao X., Zhou Z., Ollinger S.V., Matthes J.H., Jiao W., Thompson J.R. (2025) pnetr: An R package for the PnET family of forest ecosystem models. *Methods in Ecology & Evolution*. (issue and volume info coming soon)
+> 
+> Gao, X., Zhou, Z., Ollinger, S. V., Matthes, J. H., Jiao, W., & Thompson, J. R. (2025). pnetr: An R package for the PnET family of forest ecosystem models. Methods in Ecology and Evolution, 00, 1–11. https://doi.org/10.1111/2041-210X.70076
 
 
 
@@ -56,6 +59,9 @@ The `tests` folder contains scripts that are used for unit tests by the `testtha
 
 Developer notes can be found [here](/doc/developer_notes.md), which provide more detailed information about how to code the repository.
 
+There are two ways to modify routines in the package without breaking the original code for hypothesis testing:
+1. To replace the exported functions (e.g., `PnET-Day()`, `PnET-II()`, and `PnET-CN()`), users can copy and paste the original function to modify it, then use `source([the_modified_function_file])` to overwrite the function.
+2. To replace the internal functions (e.g., `Phenology()`, `Waterbal()`, and `CNTrans()`), users can write another function with the same name as the internal function to be replaced, then use `assignInNamespace("[the internal function]", [the modified function with the same name], ns = "pnetr")`. For instance, we can write another function named `Phenology()` in our global namespace, then run `assignInNamespace("Phenology", Phenology, ns = "pnetr")`. After this operation, when `pnetr` calls the `Phenology()` function, it will use the customized `Phenology()` function instead of the original one in the package. 
 
 
 ## References
