@@ -150,7 +150,7 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     # Transpiration
     # Potential transpiration
     CanopyGrossPsnMG <- share$vars$CanopyGrossPsn * 1000 * 44 / 12
-    # HACK: this thing can be calculated at once globally
+
     WUE <- vegpar$WUEconst / VPD
     # Potential transpiration; convert units
     PotTransd <- CanopyGrossPsnMG / WUE / 10000
@@ -211,7 +211,6 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     if (sitepar$WaterStress == 0) {
         DWater <- 1
     }
-
     # Canopy gross photosynthesis with water stress
     CanopyGrossPsnAct <- share$vars$CanopyGrossPsn * DWater
     # Accumulate to monthly
@@ -229,7 +228,7 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
         Drainage <- 0
     }
 
-
+    # Total net photosynthesis
     TotPsn <- share$vars$TotPsn + NetPsnMo
     TotTrans <- share$vars$TotTrans + Trans
     TotGrossPsn <- share$vars$TotGrossPsn + GrsPsnMo

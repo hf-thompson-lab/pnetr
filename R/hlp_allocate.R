@@ -277,8 +277,8 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
 
     if (model == "pnet-cn") {
         if (PlantN > vegpar$MaxNStore) {
-            PlantN <- vegpar$MaxNStore
             NH4 <- NH4 + (PlantN - vegpar$MaxNStore)
+            PlantN <- vegpar$MaxNStore
         }
         # Calculate NRatio
         NRatio <- 1 + (PlantN / vegpar$MaxNStore) * vegpar$FolNConRange
@@ -301,26 +301,27 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
             }
         }
 
+        PlantN <- PlantN - BudN
+
+
         # Foliar 
         folnconnew <- (share$vars$FolMass * (vegpar$FolNCon / 100) + BudN) /
             (share$vars$FolMass + (BudC / vegpar$CFracBiomass)) * 100
+        
         if (is.na(folnconnew)) {
             folnconnew <- 0
         }
         vegpar$FolNCon <- folnconnew
 
-        PlantN <- PlantN - BudN
         
         # Nitro
         if (NRatio >= 1) {
             nr <- max(0, NRatio - 1 - (vegpar$FolNConRange / 3))
             NRatioNit <- min(1, (nr / (0.6667 * vegpar$FolNConRange))^2)
+        } else {
+            NRatioNit <- 0
         }
 
-        if (PlantN > vegpar$MaxNStore) {
-            NH4 <- share$vars$NH4 + (PlantN - vegpar$MaxNStore)
-            PlantN <- vegpar$MaxNStore
-        }
 
         RootNSinkEff <- sqrt(1 - (PlantN / vegpar$MaxNStore))
         
@@ -330,7 +331,7 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
             share$vars$WoodGRespYr - 
             share$vars$FolGRespYr - 
             share$vars$RootMRespYr - share$vars$RootGRespYr
-            
+        
         FolN <- share$vars$FolMass * vegpar$FolNCon / 100
         FolC <- share$vars$FolMass * vegpar$CFracBiomass
 

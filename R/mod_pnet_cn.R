@@ -56,29 +56,6 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
 
     # Now, for each time step
     for (rstep in 1L:length(share$logdt$DOY)) {
-        if (rstep > 1 && 
-            share$logdt[rstep, DOY] < share$logdt[rstep - 1, DOY]
-        ) {
-            AllocateYr(sitepar, vegpar, share, rstep, model = "pnet-cn")
-            
-            # ============== maybe detele later =================
-            # Just to make it consistent w/ Matlab version
-            # But, I don't think they are needed once we confirm all processes
-            # in the model are coded correctly.
-
-            varnames <- names(share$vars)
-            varnames <- varnames[!varnames %in% c(
-                "Tavg", "Tday", "Tnight", "Tmin", "VPD",
-                "Month", "Dayspan", "Daylenhr", "Daylen", "Nightlen",
-                "GDD", "GDDTot",
-                "DayResp", "NightResp", "DTemp", "DVPD",
-                "PlantN", "FolN"
-            )]
-            share$logvars(rstep - 1, varnames)
-            # ============== maybe detele later =================
-
-            YearInit(share)
-        }
         # Assign already calculated values
         share$vars$GDD <- share$logdt[rstep, GDD]
         share$vars$GDDTot <- share$logdt[rstep, GDDTot]
@@ -97,6 +74,16 @@ PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
         Leach(share, rstep)
 
         share$logvars(rstep)
+        
+
+        # End of the year
+        if (rstep == nrow(share$logdt) || 
+            share$logdt[rstep + 1, DOY] < share$logdt[rstep, DOY]
+        ) {
+            AllocateYr(sitepar, vegpar, share, rstep, model = "pnet-cn")
+            share$logvars(rstep)
+            YearInit(share)
+        }
 
         if (verbose == TRUE) {
             # update progress
