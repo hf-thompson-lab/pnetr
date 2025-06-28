@@ -180,7 +180,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
             # Calculate light attenuation
             Il <- climate_dt[rstep, Par] * exp(-vegpar$k * LAI)
             # Light effect on photosynthesis
-            LightEff <- (1.0 - exp(-Il * log(2.0) / vegpar$HalfSat))
+            LightEff <- 1.0 - exp(-Il * log(2.0) / vegpar$HalfSat)
 
             # Gross layer psn w/o water stress
             LayerGrossPsnRate <- GrossAmax * LightEff
