@@ -45,7 +45,8 @@ Decomp <- function(climate_dt, sitepar, vegpar, share, rstep) {
     Dayspan <- share$logdt[rstep, Dayspan]
     Tavg <- share$logdt[rstep, Tavg]
     DOY <- share$logdt[rstep, DOY]
-
+    # Number of days in this year
+    NumYrDays <- yday(paste0(share$logdt[rstep, Year], "-12-31"))
 
     # Atmospheric N deposition
     NO3 <- share$vars$NO3 + climate_dt[rstep, NO3dep]
@@ -63,7 +64,7 @@ Decomp <- function(climate_dt, sitepar, vegpar, share, rstep) {
     HON <- share$vars$HON + share$vars$TotalLitterN
 
     # Humus dynamics
-    KhoAct <- vegpar$Kho * (Dayspan / 365)
+    KhoAct <- vegpar$Kho * (Dayspan / NumYrDays)
     DHO <- HOM * (1 - exp(-KhoAct * TMult * WMult))
     
     GrossNMin <- DHO * (HON / HOM)

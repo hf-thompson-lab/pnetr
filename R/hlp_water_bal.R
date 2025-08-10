@@ -148,14 +148,15 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     waterind <- waterin / Dayspan
 
     # Transpiration
-    # Potential transpiration
-    CanopyGrossPsnMG <- share$vars$CanopyGrossPsn * 1000 * 44 / 12
+    # Convert unit from `g C m^-2` to `mg CO2 m^-2`
+    CanopyGrossPsnMG <- share$vars$CanopyGrossPsn * 1000 * (44 / 12)
 
-    WUE <- vegpar$WUEconst / VPD
-    # Potential transpiration; convert units
-    PotTransd <- CanopyGrossPsnMG / WUE / 10000
+    # Wter use efficiency `g CO2 kg^-1 water`
+    WUE <- vegpar$WUEconst / VPD * share$vars$DWUE
+    # Potential transpiration; convert units to `cm water`
+    PotTransd <- CanopyGrossPsnMG / share$vars$DelAmax / WUE / 10000
     Trans <- 0
-    if (PotTransd > 0) {
+    if (!is.na(PotTransd) && PotTransd > 0) {
         TotSoilMoistEff <- 0
         Water <- share$vars$Water
         for (wday in 1:Dayspan) {

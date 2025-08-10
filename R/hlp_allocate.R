@@ -48,6 +48,9 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     Tavg <- share$logdt[rstep, Tavg]
     Dayspan <- share$logdt[rstep, Dayspan]
 
+    # Number of days in this year
+    NumYrDays <- yday(paste0(share$logdt[rstep, Year], "-12-31"))
+
 
     # Update plant C pool
     PlantC <- share$vars$PlantC + share$vars$NetPsnMo - share$vars$FolGRespMo
@@ -84,14 +87,14 @@ AllocateMon <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     # We first calculate a prorated root production for this month based on the
     # foliar production of this month. Then, we calculate the montly root C
     # production.
-    RootCAdd <- vegpar$RootAllocA * (Dayspan / 365.0) + 
+    RootCAdd <- vegpar$RootAllocA * (Dayspan / NumYrDays) + 
         vegpar$RootAllocB * share$vars$FolProdCMo
     
     # Available root carbon
     RootC <- share$vars$RootC + RootCAdd
     # The amount of carbon that is allocated to root, depends on temeprature
     TMult <- exp(0.1 * (Tavg - 7.1)) * 0.68
-    RootAllocCMo <- min(1.0, ((1.0 / 12.0) * TMult)) * RootC
+    RootAllocCMo <- min(1.0, ((Dayspan / NumYrDays) * TMult)) * RootC
     
     # Update root carbon after allocation
     RootC <- RootC - RootAllocCMo
@@ -210,11 +213,12 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     # Variables to update
     BudC <- WoodC <- PlantC <- NULL
     NPPFolYr <- NPPWoodYr <- NPPRootYr <- NULL
-    FolMassMax <- FolMassMin <- NULL # in VegPar
+    FolMassMax <- FolMassMin <- NULL
     NEP <- NULL
-    
+
+
     # Save current foliar N for output b/c later vegpar$FolNCon will be updated
-    FolNConOld <- vegpar$FolNCon
+    FolNConOld <- share$vars$FolNCon
 
     # For PnET-CN
     if (model == "pnet-cn") {
@@ -244,14 +248,13 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     SppMaxFol <- avgPCBM * (1 + vegpar$FolRelGrowMax * share$vars$LightEffMin)
     EnvMaxFol <- avgDWater * SppMaxFol
     
-    vegpar$FolMassMax <- min(EnvMaxFol, SppMaxFol)
-    vegpar$FolMassMin <- vegpar$FolMassMax - 
-        vegpar$FolMassMax * (1 / vegpar$FolReten)
+    FolMassMax <- min(EnvMaxFol, SppMaxFol)
+    FolMassMin <- FolMassMax - FolMassMax * (1 / vegpar$FolReten)
     
     # Allocate to BudC
     BudC <- max(
         0, 
-        (vegpar$FolMassMax - share$vars$FolMass) * vegpar$CFracBiomass
+        (FolMassMax - share$vars$FolMass) * vegpar$CFracBiomass
     )
     # Update PlantC
     PlantC <- share$vars$PlantC - BudC
@@ -266,9 +269,8 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         WoodC <- TotalC * (
             vegpar$MinWoodFolRatio / (1 + vegpar$MinWoodFolRatio)
         )
-        vegpar$FolMassMax <- share$vars$FolMass + BudC / vegpar$CFracBiomass
-        vegpar$FolMassMin <- vegpar$FolMassMax - 
-            vegpar$FolMassMin * (1 / vegpar$FolReten)
+        FolMassMax <- share$vars$FolMass + BudC / vegpar$CFracBiomass
+        FolMassMin <- FolMassMax - FolMassMin * (1 / vegpar$FolReten)
     }
 
     NEP <- share$vars$TotPsn - share$vars$WoodMRespYr - share$vars$WoodGRespYr - 
@@ -305,13 +307,12 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
 
 
         # Foliar 
-        folnconnew <- (share$vars$FolMass * (vegpar$FolNCon / 100) + BudN) /
+        folnconnew <- (share$vars$FolMass * (share$vars$FolNCon / 100) + BudN) /
             (share$vars$FolMass + (BudC / vegpar$CFracBiomass)) * 100
         
         if (is.na(folnconnew)) {
             folnconnew <- 0
         }
-        vegpar$FolNCon <- folnconnew
 
         
         # Nitro
@@ -332,7 +333,7 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
             share$vars$FolGRespYr - 
             share$vars$RootMRespYr - share$vars$RootGRespYr
         
-        FolN <- share$vars$FolMass * vegpar$FolNCon / 100
+        FolN <- share$vars$FolMass * share$vars$FolNCon / 100
         FolC <- share$vars$FolMass * vegpar$CFracBiomass
 
         TotalN <- FolN + share$vars$WoodMassN + share$vars$RootMassN + 
@@ -356,6 +357,9 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     share$vars$NPPRootYr <- NPPRootYr
     share$vars$NEP <- NEP
     share$vars$FolNConOld <- FolNConOld
+    share$vars$FolNCon <- folnconnew
+    share$vars$FolMassMax <- FolMassMax
+    share$vars$FolMassMin <- FolMassMin
 
     if (model == "pnet-cn") {
         share$vars$NRatio <- NRatio
