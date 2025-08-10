@@ -26,7 +26,7 @@ PnET_Day <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     # Assigning the data.table will result in copying data, but passing by
     # reference seems not working for Windows machines!
     share$logdt <- AtmEnviron(climate_dt, sitepar$Lat, share$logdt)
-    share$glb$Amax <- vegpar$AmaxA + vegpar$AmaxB * vegpar$FolNCon
+    share$glb$Amax <- vegpar$AmaxA + vegpar$AmaxB * share$vars$FolNCon
     share$glb$Amax_d <- share$glb$Amax * vegpar$AmaxFrac
     share$glb$BaseFolResp <- share$glb$Amax * vegpar$BaseFolRespFrac
 

@@ -63,7 +63,6 @@ There are two ways to modify routines in the package without breaking the origin
 1. To replace the exported functions (e.g., `PnET-Day()`, `PnET-II()`, and `PnET-CN()`), users can copy and paste the original function to modify it, then use `source([the_modified_function_file])` to overwrite the function.
 2. To replace the internal functions (e.g., `Phenology()`, `Waterbal()`, and `CNTrans()`), users can write another function with the same name as the internal function to be replaced, then use `assignInNamespace("[the internal function]", [the modified function with the same name], ns = "pnetr")`. For instance, we can write another function named `Phenology()` in our global namespace, then run `assignInNamespace("Phenology", Phenology, ns = "pnetr")`. After this operation, when `pnetr` calls the `Phenology()` function, it will use the customized `Phenology()` function instead of the original one in the package. 
 
-
 ## References
 
 - Aber, J. D., Driscoll, C., Federer, C. A., Lathrop, R., Lovett, G., Melillo, J. M., Steudler, P., & Vogelmann, J. (1993). A strategy for the regional analysis of the effects of physical and chemical climate change on biogeochemical cycles in northeastern (U.S.) forests. *Ecological Modelling*, 67(1), 37–47. https://doi.org/10.1016/0304-3800(93)90098-D

@@ -119,6 +119,10 @@ ShareVars <- R6::R6Class("ShareVars",
             BudC = 0,
             # Foliar mass (g m^-2)
             FolMass = 0, 
+            # Annual max foliar mass (g m^-2)
+            FolMassMax = 0,
+            # Annual min foliar mass (g m^-2)
+            FolMassMin = 0,
             # Foliar litter
             FolLitM = 0,
             # Leaf area index (m^2 m^-2)
@@ -183,6 +187,7 @@ ShareVars <- R6::R6Class("ShareVars",
             AgHarv = 0,
 
             FolN = 0,
+            FolNCon = 0,
             FolNConOld = 0,
             FolC = 0,
             TotalN = 0,
@@ -257,6 +262,10 @@ ShareVars <- R6::R6Class("ShareVars",
             self$logdt[, DOY := climate_dt$DOY]
 
             # Init values
+            self$vars$FolMassMax <- vegpar$FolMassMax
+            self$vars$FolMassMin <- vegpar$FolMassMin
+            self$vars$FolNCon <- vegpar$FolNCon
+
             self$vars$PlantC <- 900
             self$vars$BudC <- 135
             self$vars$DeadWoodM <- 11300
@@ -365,9 +374,11 @@ ShareVars <- R6::R6Class("ShareVars",
                 TotET = TotTrans + TotEvap,
                 # Carbon cycle
                 PlantC, BudC, WoodC, RootC,
-                FolMass, DeadWoodM, WoodMass, RootMass,
+                FolMass, FolMassMax, FolMassMin,
+                DeadWoodM, WoodMass, RootMass,
                 HOM, HON,
                 # Nitrogen cycle
+                FolNCon,
                 PlantN, BudN, NDrainYr, NetNMinYr, GrossNMinYr, PlantNUptakeYr,
                 GrossNImmobYr, TotalLitterNYr, NetNitrYr, NRatio, 
                 FolN = FolNConOld, NdepTot, 

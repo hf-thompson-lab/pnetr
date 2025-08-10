@@ -15,6 +15,7 @@ CalDTemp <- function(Tday, Tmin, PsnTOpt, PsnTMin, GDDTot, GDDFolEnd, Dayspan) {
         if ((Tmin[i] < 6) & (DTemp[i] > 0) & (GDDTot[i] >= GDDFolEnd)) {
             DTemp_new <- max(
                 0, 
+                # Frost effect
                 DTemp[i] * (1.0 - ((6.0 - Tmin[i]) / 6.0) * (Dayspan[i] / 30.0))
             )
             return(DTemp_new)
@@ -23,6 +24,8 @@ CalDTemp <- function(Tday, Tmin, PsnTOpt, PsnTMin, GDDTot, GDDFolEnd, Dayspan) {
         }
     })
     
+    DTemp[DTemp < 0] <- 0
+
     return(DTemp)
 }
 
@@ -130,7 +133,7 @@ Photosynthesis <- function(climate_dt, sitepar, vegpar, share, rstep,
         if (model == "pnet-cn") {
             CO2Psn <- CalCO2effectPsn(climate_dt$CO2[rstep], vegpar)
 
-            share$glb$Amax <- vegpar$AmaxA + vegpar$AmaxB * vegpar$FolNCon *
+            share$glb$Amax <- vegpar$AmaxA + vegpar$AmaxB * share$vars$FolNCon *
                 CO2Psn$DelAmax
             share$glb$Amax_d <- share$glb$Amax * vegpar$AmaxFrac
             share$glb$BaseFolResp <- share$glb$Amax * vegpar$BaseFolRespFrac

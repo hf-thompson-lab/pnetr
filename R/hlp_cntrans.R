@@ -13,7 +13,9 @@
 #' @param BiomLossFrac Biome loss fraction due to disturbance
 #'
 #' @return Root turnover rate.
-CalRootTurnoverRate <- function(vegpar, netNmin, dayspan, BiomLossFrac) {
+CalRootTurnoverRate <- function(vegpar, netNmin, dayspan, 
+    NumYrDays, BiomLossFrac
+) {
     # Root turnover
     RootTurnover <- vegpar$RootTurnoverA - (vegpar$RootTurnoverB * netNmin) +
         (vegpar$RootTurnoverC * netNmin^2)
@@ -25,7 +27,7 @@ CalRootTurnoverRate <- function(vegpar, netNmin, dayspan, BiomLossFrac) {
         RootTurnover <- 0.1
     }
 
-    RootTurnover <- RootTurnover * (dayspan / 365)
+    RootTurnover <- RootTurnover * (dayspan / NumYrDays)
 
     if (RootTurnover < BiomLossFrac) {
         RootTurnover <- BiomLossFrac
@@ -78,6 +80,8 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
     # Some already calculated variables at this time step
     Dayspan <- share$logdt[rstep, Dayspan]
     DOY <- share$logdt[rstep, DOY]
+    # Number of days in this year
+    NumYrDays <- yday(paste0(share$logdt[rstep, Year], "-12-31"))
 
     # Check for disturbance year
     BiomLossFrac <- 0
@@ -99,6 +103,7 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
         vegpar, 
         share$vars$NetNMinLastYr, 
         Dayspan,
+        NumYrDays,
         BiomLossFrac
     )
 
@@ -119,9 +124,9 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
         WoodMassN <- share$vars$WoodMassN * (1 - BiomLossFrac)
     } else {
         WoodLitM <- share$vars$WoodMass * vegpar$WoodTurnover * 
-            (Dayspan / 365)
+            (Dayspan / NumYrDays)
         WoodLitN <- share$vars$WoodMassN * vegpar$WoodTurnover * 
-            (Dayspan / 365)
+            (Dayspan / NumYrDays)
         # Update wood litter mass and N
         WoodMass <- share$vars$WoodMass - WoodLitM
         WoodMassN <- share$vars$WoodMassN - WoodLitN
@@ -133,7 +138,7 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
 
     # Wood mass loss
     WoodMassLoss <- DeadWoodM * vegpar$WoodLitLossRate * 
-        (Dayspan / 365)
+        (Dayspan / NumYrDays)
     # Wood transfer
     WoodTransM <- WoodMassLoss * (1 - vegpar$WoodLitCLoss)
     
@@ -149,7 +154,7 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
     NetCBal <- share$vars$NetCBal - WoodDecResp
 
     # Foliar N loss
-    FolNLoss <- share$vars$FolLitM * (vegpar$FolNCon / 100)
+    FolNLoss <- share$vars$FolLitM * (share$vars$FolNCon / 100)
     Retrans <- FolNLoss * vegpar$FolNRetrans
     PlantN <- share$vars$PlantN + Retrans
     FolLitN <- FolNLoss - Retrans
@@ -158,7 +163,7 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
     if (BiomLossFrac > 0) {
         FolLitM <- FolLitM + (share$vars$FolMass * BiomLossFrac)
         FolLitN <- FolLitN + (share$vars$FolMass * BiomLossFrac *
-            (VegPar$FolNCon / 100))
+            (share$vars$FolNCon / 100))
         FolMass <- share$vars$FolMass * (1 - BiomLossFrac)
         PlantC <- share$vars$PlantC * (1 - BiomLossFrac)
         PlantN <- PlantN + (vegpar$MaxNStore - PlantN) * BiomLossFrac
@@ -173,8 +178,8 @@ CNTrans <- function(climate_dt, sitepar, vegpar, share, rstep) {
     ) {
         TotalLitterM <- TotalLitterM * (1 - sitepar$agrem)
         TotalLitterN <- TotalLitterN * (1 - sitepar$agrem)
-        WoodMass <- WoodMass * (1 - sitepar$agrem * (Dayspan / 365))
-        WoodMassN <- WoodMassN * (1 - sitepar$agrem * (Dayspan / 365))
+        WoodMass <- WoodMass * (1 - sitepar$agrem * (Dayspan / NumYrDays))
+        WoodMassN <- WoodMassN * (1 - sitepar$agrem * (Dayspan / NumYrDays))
     }
 
     TotalLitterMYr <- share$vars$TotalLitterMYr + TotalLitterM
