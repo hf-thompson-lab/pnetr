@@ -20,6 +20,7 @@
 #' @param vegpar A table that contains vegetation-specific variables.
 #'
 #' @return A list that contains both annual and monthly computed variables.
+#' @export 
 PnET_CN <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
     # Create a share object to save intermittent computing results
     share <- ShareVars$new(climate_dt, vegpar)
