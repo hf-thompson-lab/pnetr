@@ -13,7 +13,7 @@ VegPar <- R6::R6Class("VegPar", inherit = Param,
 
     public = list(
         # ~ Canopy variables ----------------------------------------
-        #' Canopy light attenuation constant (unitless)
+        # Canopy light attenuation constant (unitless)
         k = numeric(),
         # Foliar nitrogen (% by weight; 100 g N g^-1 dm)
         FolNCon = numeric(),
