@@ -4,7 +4,7 @@
 \alias{CalRootTurnoverRate}
 \title{Calculate root turnover rate (Aber et al 1997).}
 \usage{
-CalRootTurnoverRate(vegpar, netNmin, dayspan, BiomLossFrac)
+CalRootTurnoverRate(vegpar, netNmin, dayspan, NumYrDays, BiomLossFrac)
 }
 \arguments{
 \item{vegpar}{The vegetation parameter object.}

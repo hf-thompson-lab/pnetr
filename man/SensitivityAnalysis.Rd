@@ -5,21 +5,21 @@
 \title{Conduct the sensitivity analysis for each set of parameters.}
 \usage{
 SensitivityAnalysis(
-  vegpar_temp,
-  vegpar_mat,
   clim_dt,
-  sitepar,
+  vegpar_templ,
+  vegpar_mat,
+  sitepar_templ,
+  sitepar_mat,
   model = "pnet-day",
-  target_pars = c("CanopyGrossPsn", "CanopyNetPsn"),
-  annual = TRUE
+  target_pars = c("GrsPsnMo", "NetPsnMo"),
+  annual = TRUE,
+  cl = NULL
 )
 }
 \arguments{
-\item{vegpar_mat}{Sampled parameter matrix.}
-
 \item{clim_dt}{A table that contains monthly climate data.}
 
-\item{sitepar}{A table that contains site-specific variables.}
+\item{vegpar_mat}{Sampled parameter matrix.}
 
 \item{model}{Model name, should be one of "pnet-day", "pnet-ii",
 and "pnet-cn".}
@@ -29,6 +29,8 @@ and "pnet-cn".}
 \item{annual}{Logical. Whether the target parameters are annual.}
 
 \item{vegpar_template}{A template object for the \code{vegpar} object.}
+
+\item{sitepar}{A table that contains site-specific variables.}
 }
 \value{
 Model outputs for the target parameters.
