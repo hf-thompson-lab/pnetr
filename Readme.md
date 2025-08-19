@@ -25,7 +25,7 @@ The package can be installed by running the following command in R terminal:
 
 ```{r }
 # install.packages("remotes")
-remotes::install_github("hf-thompson-lab/pnetr")
+remotes::install_github("hf-thompson-lab/pnetr", force = TRUE)
 ```
 
 To run the example data, please find the data in `tests/testthat/testdata/`:
