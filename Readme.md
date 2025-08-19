@@ -32,6 +32,11 @@ To run the example data, please find the data in `tests/testthat/testdata/`:
 
 ```{r }
 library(pnetr)
+# Also load data.table and magrittr in case they are not loaded by default!
+library(data.table)
+library(magrittr)
+library(lubridate)
+
 # Make sure to change your path for the files!
 clim <- data.table::fread("climate_data.csv")
 site_par <- SitePar$new("site_par.csv")
