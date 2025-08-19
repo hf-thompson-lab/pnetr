@@ -14,6 +14,10 @@ PnET is a simple lumped-parameter forest ecosystem model family designed to simu
 > Gao, X., Zhou, Z., Ollinger, S. V., Matthes, J. H., Jiao, W., & Thompson, J. R. (2025). pnetr: An R package for the PnET family of forest ecosystem models. Methods in Ecology and Evolution, 00, 1–11. https://doi.org/10.1111/2041-210X.70076
 
 
+> [!NOTE]  
+> We expect some errors/bugs in the first several versions, so please feel free to create an issue through Github if you suspect something is not working well. Thank you for helping us improve the package!
+
+
 
 ## Installation
 
@@ -24,12 +28,20 @@ The package can be installed by running the following command in R terminal:
 remotes::install_github("hf-thompson-lab/pnetr")
 ```
 
+To run the example data, please find the data in `tests/testthat/testdata/`:
+
+```{r }
+# Make sure to change your path for the files!
+clim <- data.table::fread("climate_data.csv")
+site_par <- SitePar$new("site_par.csv")
+veg_par <- VegPar$new("veg_par.csv")
+
+mod_orig <- PnET_II(clim, site_par, veg_par, verbose = TRUE)
+```
+
 **We encourage users folk/download this repository and modify any part of the scripts for their needs**. We often read science papers claiming:"earth system models do not capture or underestimate xxx processes/effects" but most earth system models are hard to modify because they are coded in low-level programming languages for computational reasons and they are too complex to handle for most scientists who only wants to test their scientific hypotheses/findings. In this case, users can modify the corresponding processes in this pacakge and test their hypothses directly. Also for this reason, we provided detailed documentation for the encoded processes in this pacakge for user's references. 
 
 A typical useage of this package would be, say, we find some new ecological process through empirical analysis and draw some inferences based on that, but we are not sure whether the process is causal or how much it can improve ecosystem models in representing the carbon/water cycles. In this case, we can directly add our new process into this model and test how it interacts with other variables and check whether it makes sense or not. 
-
-> [!NOTE]  
-> We expect some errors/bugs in the first several versions, so please feel free to create an issue through Github if you suspect something is not working well. Thank you for helping us improve the package!
 
 
 

@@ -6,6 +6,9 @@
 # ******************************************************************************
 
 
+#' The vegetation related parameters.
+#' 
+#' @export
 VegPar <- R6::R6Class("VegPar", inherit = Param,
 
     public = list(
@@ -69,7 +72,7 @@ VegPar <- R6::R6Class("VegPar", inherit = Param,
         # Fraction of precipitation intercepted and evaporated
         PrecIntFrac = numeric(),
         # Constant in equation for water use efficiency as a function of VPD
-        WUEconst = 10.9,
+        WUEConst = 10.9,
         # Fraction of water inputs lost directly to drainage
         FastFlowFrac = 0.1,
         # Soil water release parameter

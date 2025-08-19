@@ -357,11 +357,12 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     share$vars$NPPRootYr <- NPPRootYr
     share$vars$NEP <- NEP
     share$vars$FolNConOld <- FolNConOld
-    share$vars$FolNCon <- folnconnew
+    
     share$vars$FolMassMax <- FolMassMax
     share$vars$FolMassMin <- FolMassMin
 
     if (model == "pnet-cn") {
+        share$vars$FolNCon <- folnconnew
         share$vars$NRatio <- NRatio
         share$vars$PlantN <- PlantN
         share$vars$RootNSinkEff <- RootNSinkEff

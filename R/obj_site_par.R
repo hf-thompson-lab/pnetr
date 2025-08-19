@@ -6,7 +6,11 @@
 # ******************************************************************************
 
 
-# These default values are from Aber et al 1992, 1995, 1996
+#' The site related parameters.
+#' 
+#' @description These default values are from Aber et al 1992, 1995, 1996
+#'
+#' @export
 SitePar <- R6::R6Class("SitePar", inherit = Param,
 
     public = list(

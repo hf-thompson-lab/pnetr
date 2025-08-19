@@ -152,7 +152,7 @@ Waterbal <- function(climate_dt, sitepar, vegpar, share, rstep,
     CanopyGrossPsnMG <- share$vars$CanopyGrossPsn * 1000 * (44 / 12)
 
     # Wter use efficiency `g CO2 kg^-1 water`
-    WUE <- vegpar$WUEconst / VPD * share$vars$DWUE
+    WUE <- vegpar$WUEConst / VPD * share$vars$DWUE
     # Potential transpiration; convert units to `cm water`
     PotTransd <- CanopyGrossPsnMG / share$vars$DelAmax / WUE / 10000
     Trans <- 0
