@@ -31,6 +31,7 @@ remotes::install_github("hf-thompson-lab/pnetr")
 To run the example data, please find the data in `tests/testthat/testdata/`:
 
 ```{r }
+library(pnetr)
 # Make sure to change your path for the files!
 clim <- data.table::fread("climate_data.csv")
 site_par <- SitePar$new("site_par.csv")
