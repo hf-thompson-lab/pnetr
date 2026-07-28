@@ -74,6 +74,11 @@ PnET_II <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
         AllocateMon(sitepar, vegpar, share, rstep)
         Phenology(sitepar, vegpar, share, rstep, phenophase = "senesce")
 
+        # PnET-II explicitly simulates foliar litter only. Keep its annual
+        # litter output rather than leaving the PnET-CN accumulator at zero.
+        share$vars$TotalLitterMYr <- share$vars$TotalLitterMYr +
+            share$vars$FolLitM
+
         # End of year activity
         if (share$logdt[rstep, Month] == 12) {
             AllocateYr(sitepar, vegpar, share, rstep)
@@ -97,7 +102,6 @@ PnET_II <- function(climate_dt, sitepar, vegpar, verbose = FALSE) {
 
     return(out)
 }
-
 
 
 

@@ -176,8 +176,10 @@ ShareVars <- R6::R6Class("ShareVars",
 
             # ~ PnET-CN ----------------------------------------
 
-            DWUE = 0,
-            DelAmax = 0,
+            # Neutral CO2 multipliers. PnET-CN recalculates these, while
+            # PnET-II must retain 1 to avoid division by zero in Waterbal().
+            DWUE = 1,
+            DelAmax = 1,
             CanopyDO3Pot = 0,
             DroughtO3Frac = 0,
             TotO3Dose = 0,
