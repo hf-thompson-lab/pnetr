@@ -1,12 +1,15 @@
 Package: pnetr
-Title: What the Package Does (One Line, Title Case)
+Title: Photosynthetic and Evapotranspiration Model Family in R
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: person("Xiaojie", "Gao", email = "xj.gao.gis@outlook.com",
+    role = c("aut", "cre"))
+Author: Xiaojie Gao [aut, cre]
+Maintainer: Xiaojie Gao <xj.gao.gis@outlook.com>
+Description: Implements the Photosynthetic and EvapoTranspiration (PnET)
+    family of forest ecosystem models, including PnET-II, PnET-Day, and
+    PnET-CN. The models simulate forest carbon, water, and nitrogen cycling
+    in response to climate and site conditions.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
