@@ -10,6 +10,9 @@
 #' @importFrom data.table .N
 #' @importFrom data.table .NGRP
 #' @importFrom data.table .SD
+#' @importFrom data.table fread
 #' @importFrom data.table data.table
 ## usethis namespace: end
 NULL
+#' @export
+data.table::fread
