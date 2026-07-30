@@ -260,7 +260,10 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
     PlantC <- share$vars$PlantC - BudC
 
     # Allocate to WoodC
-    WoodC <- (1 - vegpar$PlantCReserveFrac) * PlantC
+    # A negative plant C balance cannot support wood production. Without this
+    # guard, a negative PlantC creates a negative WoodC allocation pool and
+    # therefore negative NPPWoodYr in the following year.
+    WoodC <- max(0, (1 - vegpar$PlantCReserveFrac) * PlantC)
     # Updaet PlantC again
     PlantC <- PlantC - WoodC
 
@@ -270,7 +273,7 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
             vegpar$MinWoodFolRatio / (1 + vegpar$MinWoodFolRatio)
         )
         FolMassMax <- share$vars$FolMass + BudC / vegpar$CFracBiomass
-        FolMassMin <- FolMassMax - FolMassMin * (1 / vegpar$FolReten)
+        FolMassMin <- FolMassMax - FolMassMax * (1 / vegpar$FolReten)
     }
 
     NEP <- share$vars$TotPsn - share$vars$WoodMRespYr - share$vars$WoodGRespYr - 
@@ -377,4 +380,3 @@ AllocateYr <- function(sitepar, vegpar, share, rstep, model = "pnet-ii") {
         share$vars$NetNMinLastYr <- share$vars$NetNMinYr
     }
 }
-

@@ -77,7 +77,13 @@ Phenology <- function(sitepar, vegpar, share, rstep, phenophase) {
         if (share$vars$PosCBalMass < share$vars$FolMass && 
             DOY > vegpar$SenescStart
         ) {
-            FolMassNew <- max(share$vars$PosCBalMass, vegpar$FolMassMin)
+            # Use the annually calculated minimum so FolReten affects leaf
+            # turnover. Senescence must not create foliage when the configured
+            # minimum is greater than the foliage currently present.
+            FolMassNew <- min(
+                share$vars$FolMass,
+                max(share$vars$PosCBalMass, share$vars$FolMassMin)
+            )
             
             # Calculate LAI
             # if (FolMassNew == 0) {
